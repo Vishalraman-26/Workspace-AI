@@ -1,0 +1,26 @@
+[
+  {
+    "id": "msg_001",
+    "sender": "sarah.jenkins@techcorp.com",
+    "subject": "Q3 Budget Review and Timeline Discrepancy",
+    "timestamp": "2026-06-06T09:15:00Z",
+    "body": "Hi, I looked over the project proposal. The budget numbers look mostly fine, but we need to confirm if the delivery timeline is mid-August or late September. Let me know your thoughts before the stakeholder meeting.",
+    "unread": false
+  },
+  {
+    "id": "msg_002",
+    "sender": "noreply@github.com",
+    "subject": "[GitHub] Security Alert: dependency vulnerability found",
+    "timestamp": "2026-06-06T07:30:00Z",
+    "body": "We found a known vulnerability in one of your dependencies. Please review the alert and upgrade your packages immediately.",
+    "unread": false
+  },
+  {
+    "id": "msg_003",
+    "sender": "hr@globaltech.com",
+    "subject": "Action Required: Update your verification details",
+    "timestamp": "2026-06-05T14:22:00Z",
+    "body": "All engineering team members must complete the quarterly compliance verification profile by Friday afternoon.",
+    "unread": false
+  }
+]
