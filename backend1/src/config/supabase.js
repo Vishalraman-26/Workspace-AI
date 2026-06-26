@@ -3,7 +3,13 @@ import env from "./env.js";
 
 const supabase = createClient(
     env.SUPABASE_URL,
-    env.SUPABASE_ANON_KEY
+    env.SUPABASE_SERVICE_ROLE_KEY,
+    {
+        auth: {
+            persistSession: false,
+            autoRefreshToken: false
+        }
+    }
 );
 
 export default supabase;

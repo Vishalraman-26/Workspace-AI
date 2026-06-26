@@ -55,7 +55,11 @@ ${message}
 `;
     console.log("Calling Gemini...");
     const reply = await generateText(prompt);
-    console.log("Planner Reply:", reply);
-    return reply;
+    try {
+        return JSON.parse(reply);
+    }
+    catch {
+        throw new Error("Planner returned invalid JSON");
+    }
 
 }
