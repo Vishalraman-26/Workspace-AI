@@ -14,12 +14,11 @@ createTask
 updateTask
 deleteTask
 
-fetchInbox
+searchEmails
+summarizeInbox
 
 retrieveCalendar
-
 scheduleMeeting
-
 searchKnowledge
 
 Rules:
@@ -35,6 +34,65 @@ If a backend tool is required return
 {
 "action":"tool",
 "tool":"tool_name",
+"args":{}
+}
+
+
+Examples
+
+User:
+Show my unread emails
+
+Return
+
+{
+"action":"tool",
+"tool":"searchEmails",
+"args":{
+"unread":true
+}
+}
+
+------------------------
+
+User:
+Show TCS emails
+
+Return
+
+{
+"action":"tool",
+"tool":"searchEmails",
+"args":{
+"sender":"TCS"
+}
+}
+
+------------------------
+
+User:
+Show LinkedIn emails
+
+Return
+
+{
+"action":"tool",
+"tool":"searchEmails",
+"args":{
+"sender":"LinkedIn"
+}
+}
+
+------------------------
+
+User:
+Summarize my inbox
+
+Return
+
+{
+"action":"tool",
+"tool":"summarizeInbox",
 "args":{}
 }
 

@@ -1,5 +1,5 @@
-import supabase from "../config/supabase.js";
-import BaseService from "../shared/base.service.js";
+import supabase from "../../config/supabase.js";
+import BaseService from "../../shared/base.service.js";
 
 class TaskService extends BaseService {
 
@@ -12,7 +12,7 @@ class TaskService extends BaseService {
             .order("created_at", { ascending: false });
 
         if (error) {
-            throw new Error(error.message);
+            this.handleError(error);
         }
 
         return data;
@@ -28,7 +28,7 @@ class TaskService extends BaseService {
             .single();
 
         if (error) {
-            throw new Error(error.message);
+            this.handleError(error);
         }
 
         return data;
@@ -59,7 +59,7 @@ class TaskService extends BaseService {
             .single();
 
         if (error) {
-            throw new Error(error.message);
+            this.handleError(error);
         }
 
         return data;
@@ -78,7 +78,7 @@ class TaskService extends BaseService {
             .single();
 
         if (error) {
-            throw new Error(error.message);
+            this.handleError(error);
         }
 
         return data;
@@ -93,7 +93,7 @@ class TaskService extends BaseService {
             .eq("user_id", userId);
 
         if (error) {
-            throw new Error(error.message);
+            this.handleError(error);
         }
 
         return {

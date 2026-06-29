@@ -1,0 +1,12 @@
+var client = new HttpClient();
+var request = new HttpRequestMessage();
+request.RequestUri = new Uri("http://localhost:5000/api/google/connect");
+request.Method = HttpMethod.Get;
+
+request.Headers.Add("Accept", "*/*");
+request.Headers.Add("User-Agent", "Thunder Client (https://www.thunderclient.com)");
+request.Headers.Add("Authorization", "Bearer eyJhbGciOiJFUzI1NiIsImtpZCI6ImM4YjFmMWZlLWU1ZWYtNDJlYS1hMzJlLTMwNjI0N2IzODIwZiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL21ib29iZHZ2b2VmdXRhc2RwbWpvLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI0NDUwODdmMy0wODc1LTQ0NjQtYmFlYS02OTE4NWQ5Y2U2MzEiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzgyNTM1NjA2LCJpYXQiOjE3ODI1MzIwMDYsImVtYWlsIjoidmlzaGFsMTIzQGdvb2dsZS5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsIjoidmlzaGFsMTIzQGdvb2dsZS5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicGhvbmVfdmVyaWZpZWQiOmZhbHNlLCJzdWIiOiI0NDUwODdmMy0wODc1LTQ0NjQtYmFlYS02OTE4NWQ5Y2U2MzEifSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJwYXNzd29yZCIsInRpbWVzdGFtcCI6MTc4MjUzMjAwNn1dLCJzZXNzaW9uX2lkIjoiOGM1NDQwNWEtMjEzNy00ZDk5LWE5YzQtZDU2NDYzOTI1MGEwIiwiaXNfYW5vbnltb3VzIjpmYWxzZX0.jZb9gQDLpm0GiTU0gdJzcr0VgToKa_ekaJZz_ZeFAwGtYpo5p9f-yWuVL1c5PZ759ddDpyVUd5eUekMsEBS0eQ");
+
+var response = await client.SendAsync(request);
+var result = await response.Content.ReadAsStringAsync();
+Console.WriteLine(result);

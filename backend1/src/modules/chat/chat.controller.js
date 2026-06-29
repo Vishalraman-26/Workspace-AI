@@ -26,14 +26,15 @@ class ChatController {
 
         }
 
-        catch(error){
+        catch (err) {
 
-            return res.status(500).json({
+            console.error("========== ERROR ==========");
+            console.error(err);
 
-                success:false,
-
-                message:error.message
-
+            res.status(500).json({
+                success: false,
+                message: err.message,
+                stack: err.stack
             });
 
         }

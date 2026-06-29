@@ -1,5 +1,5 @@
 import taskService from "./task.service.js";
-import { success, failure } from "../shared/response.js";
+import { success, failure } from "../../shared/response.js";
 
 class TaskController {
 

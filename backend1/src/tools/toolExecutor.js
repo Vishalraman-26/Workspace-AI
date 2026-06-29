@@ -1,34 +1,40 @@
 import toolRegistry from "./toolRegistry.js";
-
-import taskService from "../tasks/task.service.js";
-import * as emailService from "../services/email.service.js";
-import * as calendarService from "../services/calendar.service.js";
-
-const services = {
+import { ZodError } from "zod";
+import taskService from "../modules/tasks/task.service.js";
+import GmailService from "../modules/google/gmail.service.js";
+export const services = {
     task: taskService,
-    email: emailService,
-    calendar: calendarService
+    gmail: GmailService
 };
+import QueryNormalizer from "./queryNormalizer.js";
 
 export async function executeTool(plan,userId){
-    console.log("========== TOOL EXECUTOR ==========");
-    console.log(plan);
-    console.log("Executing Tool:", plan.tool);
-    const tool = toolRegistry[plan.tool];
-    console.log("Service:", tool.service);
-    console.log("Method:", tool.method);
-    console.log("User:", userId);
-    if(!tool){
-        throw new Error("Unknown Tool");
-    }
+    try{
+        console.log(plan);
+        const tool = toolRegistry[plan.tool];
+        if(!tool){
+            throw new Error("Unknown Tool");
+        }
+        if(tool.schema){
+            tool.schema.parse(plan.args);
+        }
+        const service = services[tool.service];
+        if (!service) {
+            throw new Error(`Unknown service: ${tool.service}`);
+        }
+        const args = QueryNormalizer.normalize(plan.args || {});
 
-    const service = services[tool.service];
-
-    if(tool.requiresArgs){
-        return service[tool.method](
-            userId,
-            plan.args
-        );
+        if(tool.requiresArgs){
+            return service[tool.method](
+                userId,
+                args
+            );
+        }
+        return await  service[tool.method](userId);
+    }catch(error){
+        if(error instanceof ZodError){
+            throw new Error(error.errors[0].message);
+        }
+        throw error;
     }
-    return service[tool.method](userId);;
 }
