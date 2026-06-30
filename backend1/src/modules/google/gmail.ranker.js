@@ -110,6 +110,8 @@ class GmailRanker {
 
         const actionRequired = priority >= 70;
 
+        //console.log("========== CATEGORY ==========");
+        //console.log({subject: email.subject,category,priority,organization});
         return {
 
             ...email,

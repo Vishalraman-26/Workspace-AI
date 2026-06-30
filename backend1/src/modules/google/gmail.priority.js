@@ -113,6 +113,17 @@ class GmailPriority {
             score += 10;
 
         }
+        if (email.category === "security") score += 20;
+
+        if (email.category === "interview") score += 20;
+
+        if (email.category === "exam") score += 15;
+
+        if (email.category === "meeting") score += 15;
+
+        if (email.category === "deadline") score += 20;
+
+        if (email.category === "hackathon") score += 10;
 
         score = Math.min(score,100);
 

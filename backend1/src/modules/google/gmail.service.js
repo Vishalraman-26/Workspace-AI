@@ -43,23 +43,31 @@ class GmailService {
             pageToken: options.pageToken
 
         });
-        console.log(search);
 
         const inbox = await GmailFetcher.fetch(
             userId,
             search
         );
         const emails = GmailThread.deduplicate(inbox.emails);
+        let filteredEmails = emails;
+        if (options.category) {
+            filteredEmails = filteredEmails.filter(
+                email => email.category === options.category
+            );
+        }
 
-        const stats = GmailStatistics.build(
-            emails
-        );
+        const stats = GmailStatistics.build(filteredEmails);
 
         return {
-            total: emails.length,
-            emails,
+
+            total: filteredEmails.length,
+
+            emails: filteredEmails,
+
             stats,
+
             nextPageToken: inbox.nextPageToken
+
         };
 
     }
@@ -81,7 +89,7 @@ class GmailService {
         );
 
         return await GmailSummarizer.summarize(
-            inbox.emails
+            inbox
         );
 
     }

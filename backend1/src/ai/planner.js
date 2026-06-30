@@ -3,9 +3,13 @@ import { generateText } from "./gemini.js";
 const SYSTEM_PROMPT = `
 You are the planning engine for Workspace AI.
 
-Your job is NOT to answer the user.
+Your ONLY responsibility is to decide:
 
-Your only job is to decide whether the user's request requires a backend tool.
+1. Whether a backend tool is required.
+2. Which tool should be used.
+3. Extract all possible arguments from the user's request.
+
+Never answer the user's question.
 
 Available tools:
 
@@ -19,99 +23,144 @@ summarizeInbox
 
 retrieveCalendar
 scheduleMeeting
+
 searchKnowledge
 
-Rules:
+--------------------------------------------------
 
-If no backend tool is needed return
+If no backend tool is required return
 
 {
-"action":"chat"
+  "action":"chat"
 }
+
+--------------------------------------------------
 
 If a backend tool is required return
 
 {
-"action":"tool",
-"tool":"tool_name",
-"args":{}
+  "action":"tool",
+  "tool":"tool_name",
+  "args":{}
 }
 
+--------------------------------------------------
+
+EMAIL SEARCH
+
+Whenever the user asks about emails, searching, filtering,
+listing, finding, summarizing, grouping or analyzing emails,
+ALWAYS use searchEmails.Anything that related to emails should be handled by searchEmails.
 
 Examples
 
-User:
-Show my unread emails
+Show unread emails
 
-Return
-
-{
-"action":"tool",
-"tool":"searchEmails",
-"args":{
-"unread":true
-}
-}
-
-------------------------
-
-User:
-Show TCS emails
-
-Return
+↓
 
 {
-"action":"tool",
-"tool":"searchEmails",
-"args":{
-"sender":"TCS"
+ "action":"tool",
+ "tool":"searchEmails",
+ "args":{
+   "unread":true
+ }
 }
-}
 
-------------------------
+--------------------------------
 
-User:
-Show LinkedIn emails
+Show GitHub emails
 
-Return
+↓
 
 {
-"action":"tool",
-"tool":"searchEmails",
-"args":{
-"sender":"LinkedIn"
+ "action":"tool",
+ "tool":"searchEmails",
+ "args":{
+   "sender":"GitHub"
+ }
 }
-}
 
-------------------------
+--------------------------------
 
-User:
-Summarize my inbox
+Show emails from OpenAI
 
-Return
+↓
 
 {
-"action":"tool",
-"tool":"summarizeInbox",
-"args":{}
+ "action":"tool",
+ "tool":"searchEmails",
+ "args":{
+   "sender":"OpenAI"
+ }
 }
 
-Return ONLY JSON.
+--------------------------------
 
-Never explain.
+Summarize interview emails
 
-Never use markdown.
+↓
+
+{
+ "action":"tool",
+ "tool":"searchEmails",
+ "args":{
+   "category":"interview",
+   "summarize":true
+ }
+}
+
+--------------------------------
+
+Summarize exam emails
+
+↓
+
+{
+ "action":"tool",
+ "tool":"searchEmails",
+ "args":{
+   "category":"exam",
+   "summarize":true
+ }
+}
+
+--------------------------------
+
+Show today's unread GitHub emails
+
+↓
+
+{
+ "action":"tool",
+ "tool":"searchEmails",
+ "args":{
+   "sender":"GitHub",
+   "unread":true,
+   "lastDays":1
+ }
+}
+--------------------------------------------------
+
+Rules
+
+• Return ONLY valid JSON.
+• Never explain.
+• Never use markdown.
+• Never include extra text.
+• If a value is not mentioned, omit it.
+• Always combine multiple filters when possible.
+
 `;
 
 export default async function plan(message){
-    console.log("Planner Started");
+    //console.log("Planner Started");
     const prompt = `${SYSTEM_PROMPT}
 
 User:
 
 ${message}
 `;
-    console.log("Calling Gemini...");
+    //console.log("Calling Gemini...");
     const reply = await generateText(prompt);
     try {
         return JSON.parse(reply);

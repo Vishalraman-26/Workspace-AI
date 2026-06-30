@@ -7,7 +7,7 @@ class GmailClient {
     async getClient(userId) {
 
         const tokens = await TokenService.getGoogleTokens(userId);
-         console.log("Setting Credentials:", tokens);
+        
 
         oauth2Client.setCredentials({
             access_token: tokens.access_token,
@@ -15,7 +15,6 @@ class GmailClient {
             expiry_date: tokens.expiry_date
 
         });
-        console.log("OAuth Credentials:", oauth2Client.credentials);
         return google.gmail({
             version: "v1",
             auth: oauth2Client

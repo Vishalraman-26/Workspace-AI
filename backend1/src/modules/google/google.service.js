@@ -20,7 +20,6 @@ class GoogleService {
             ],
             state
         });
-        console.log("Generated Google Auth URL:", url);
         return url;
     }
 

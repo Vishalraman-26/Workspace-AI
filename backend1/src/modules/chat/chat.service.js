@@ -5,12 +5,12 @@ import { generateText } from "../../ai/gemini.js";
 class ChatService {
 
     async chat(userId, message) {
-        console.log("========== CHAT ==========");
-        console.log("Message:", message);
+        //console.log("========== CHAT ==========");
+        //console.log("Message:", message);
 
         const planner = await plan(message);
-        console.log("Planner Result:", planner);
-        console.log("PLAN:", planner);
+        //console.log("Planner Result:", planner);
+        //console.log("PLAN:", planner);
         if (planner.action === "chat") {
             console.log("Planner selected CHAT");
         }
@@ -31,8 +31,9 @@ class ChatService {
             userId
 
         );
-        // If the tool returned emails, build a smart prompt
-if (planner.tool === "searchEmails") {
+      //  console.log("========== TOOL RESULT ==========");
+    //console.log(toolResult);
+    if (planner.tool === "searchEmails") {
 
     const emails = toolResult.emails || [];
 

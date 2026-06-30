@@ -28,10 +28,7 @@ class GmailFetcher {
             pageToken: searchOptions.pageToken
 
         });
-        console.log("========== GMAIL SEARCH ==========");
-        console.log("Query:", searchOptions.query);
-        console.log("Messages Found:", data.messages?.length ?? 0);
-        console.log("Next Page:", data.nextPageToken);
+
         return {
 
             messages: data.messages || [],
@@ -65,11 +62,6 @@ class GmailFetcher {
 
                 const parsedEmail = GmailParser.parse(rawEmail);
 
-                console.log({
-                    subject: parsedEmail.subject,
-                    unread: parsedEmail.unread,
-                    labels: parsedEmail.labels
-                });
 
                 return GmailRanker.rank(parsedEmail);
 
