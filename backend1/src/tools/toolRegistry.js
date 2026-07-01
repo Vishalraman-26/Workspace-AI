@@ -1,4 +1,5 @@
 import { CreateTaskSchema, UpdateTaskSchema } from "../modules/tasks/task.schema.js";
+
 export const toolRegistry = {
 
     getTasks: {
@@ -94,7 +95,7 @@ export const toolRegistry = {
 
         requiresUser: true,
 
-        requiresArgs: false
+        requiresArgs: true
 
     },
 
@@ -126,6 +127,20 @@ export const toolRegistry = {
 
     },
 
+    updateMeeting: {
+
+        service: "calendar",
+
+        method: "updateMeeting",
+
+        description: "Update a calendar event.",
+
+        requiresUser: true,
+
+        requiresArgs: true
+
+    },
+    
     searchKnowledge: {
 
         service: "rag",

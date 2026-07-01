@@ -16,10 +16,12 @@ class GoogleService {
             prompt: "consent",
             scope: [
                 "https://www.googleapis.com/auth/gmail.readonly",
-                "https://www.googleapis.com/auth/calendar"
+                "https://www.googleapis.com/auth/calendar",
+                "https://www.googleapis.com/auth/calendar.events"
             ],
             state
         });
+        console.log("Generated Google Auth URL:", url);
         return url;
     }
 

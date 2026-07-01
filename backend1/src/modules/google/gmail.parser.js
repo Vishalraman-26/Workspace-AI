@@ -1,11 +1,29 @@
 import { getHeader } from "./google.utils.js";
 
 class GmailParser {
+    extractAttachments(payload, files = []) {
+        if (!payload) {
+            return files;
+        }
+        if (payload.filename) {
+            files.push({
+                filename: payload.filename,
+                mimeType: payload.mimeType,
+                size: payload.body?.size ?? 0
+            });
+        }
+        if (payload.parts) {
+            for (const part of payload.parts) {
+                this.extractAttachments(part, files);
+            }
+        }
+        return files;
+    }
 
     parse(email) {
 
         const headers = email.payload.headers || [];
-
+        const attachments = this.extractAttachments(email.payload);
         return {
 
             id: email.id,
@@ -34,9 +52,9 @@ class GmailParser {
 
             labels: email.labelIds,
 
-            hasAttachment:
-                this.hasAttachment(email.payload)
+            hasAttachment: attachments.length > 0,
 
+            attachments
         };
 
     }

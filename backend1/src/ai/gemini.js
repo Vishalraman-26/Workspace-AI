@@ -3,7 +3,7 @@ import env from "../config/env.js";
 
 export async function generateText(message) {
     //console.log("========== GEMINI ==========");
-    //console.log(message);
+    console.log(message);
     try {
         //console.log("Sending request to Gemini...");
         const response = await gemini.models.generateContent({

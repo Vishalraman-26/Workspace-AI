@@ -23,6 +23,8 @@ summarizeInbox
 
 retrieveCalendar
 scheduleMeeting
+updateMeeting
+deleteMeeting
 
 searchKnowledge
 
@@ -138,6 +140,111 @@ Show today's unread GitHub emails
    "unread":true,
    "lastDays":1
  }
+}
+------------------------
+
+User:
+What is on my calendar today?
+
+Return
+
+{
+"action":"tool",
+"tool":"retrieveCalendar",
+"args":{
+"today":true
+}
+}
+
+------------------------
+
+User:
+Show today's meetings
+
+Return
+
+{
+"action":"tool",
+"tool":"retrieveCalendar",
+"args":{
+"today":true,
+"category":"meeting"
+}
+}
+
+------------------------
+
+User:
+Show tomorrow's schedule
+
+Return
+
+{
+"action":"tool",
+"tool":"retrieveCalendar",
+"args":{
+"tomorrow":true
+}
+}
+
+------------------------
+
+User:
+Show this week's calendar
+
+Return
+
+{
+"action":"tool",
+"tool":"retrieveCalendar",
+"args":{
+"thisWeek":true
+}
+}
+
+------------------------
+Schedule a meeting tomorrow.
+
+Return
+
+{
+"action":"tool",
+"tool":"scheduleMeeting",
+"args":{
+"title":"Meeting",
+"start":"2026-07-01T14:00:00+05:30",
+"end":"2026-07-01T15:00:00+05:30"
+}
+}
+
+------------------------
+
+User:
+Delete my meeting
+
+Return
+
+{
+"action":"tool",
+"tool":"deleteMeeting",
+"args":{
+"title":"Meeting"
+}
+}
+
+------------------------
+
+User:
+Move my interview
+
+Return
+
+{
+"action":"tool",
+"tool":"updateMeeting",
+"args":{
+"title":"Interview"
+}
 }
 --------------------------------------------------
 

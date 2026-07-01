@@ -8,6 +8,8 @@ import taskRoutes from "./modules/tasks/task.routes.js";
 import chatRoutes from "./modules/chat/chat.routes.js";
 import errorHandler from "./middleware/error.middleware.js";
 import googleRoutes from "./modules/google/google.routes.js";
+import calendarRoutes from "./modules/google/calendar.routes.js";
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -18,6 +20,7 @@ app.use("/api/tool", toolRoutes);
 app.use(errorHandler);
 app.use("/api/auth", authRoutes);
 app.use("/api/google", googleRoutes);
+app.use("/api/calendar", calendarRoutes);
 
 app.use((req, res) => {
     res.status(404).json({

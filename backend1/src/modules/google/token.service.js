@@ -10,7 +10,7 @@ class TokenService {
             .eq("user_id", userId)
             .maybeSingle();
         if (data) {
-            // console.log("Google Tokens:", data);
+            console.log("Google Tokens:", data);
         }
         if (error) {
             console.log("Error:", error);

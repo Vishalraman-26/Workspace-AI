@@ -2,9 +2,11 @@ import toolRegistry from "./toolRegistry.js";
 import { ZodError } from "zod";
 import taskService from "../modules/tasks/task.service.js";
 import GmailService from "../modules/google/gmail.service.js";
+import CalendarService from "../modules/google/calendar.service.js";
 export const services = {
     task: taskService,
-    gmail: GmailService
+    gmail: GmailService,
+    calendar: CalendarService
 };
 import QueryNormalizer from "./queryNormalizer.js";
 
@@ -18,6 +20,9 @@ export async function executeTool(plan,userId){
         if(tool.schema){
             tool.schema.parse(plan.args);
         }
+        console.log("Selected Tool:", tool);
+        console.log("Service Name:", tool.service);
+        console.log("Available Services:", Object.keys(services));
         const service = services[tool.service];
         if (!service) {
             throw new Error(`Unknown service: ${tool.service}`);
