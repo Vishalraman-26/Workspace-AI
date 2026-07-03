@@ -2,19 +2,23 @@ import { getHeader } from "./google.utils.js";
 
 class GmailParser {
     extractAttachments(payload, files = []) {
-        if (!payload) {
-            return files;
-        }
-        if (payload.filename) {
+
+        if (!payload) return files;
+
+        if (payload.filename &&payload.body?.attachmentId) {
             files.push({
+                id: payload.body.attachmentId,
                 filename: payload.filename,
                 mimeType: payload.mimeType,
-                size: payload.body?.size ?? 0
+                size: payload.body.size
             });
         }
         if (payload.parts) {
             for (const part of payload.parts) {
-                this.extractAttachments(part, files);
+                this.extractAttachments(
+                    part,
+                    files
+                );
             }
         }
         return files;
@@ -54,7 +58,7 @@ class GmailParser {
 
             hasAttachment: attachments.length > 0,
 
-            attachments
+            attachments: attachments
         };
 
     }

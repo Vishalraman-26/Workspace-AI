@@ -35,6 +35,22 @@ const CATEGORY_PRIORITY = {
     general: 15
 
 };
+const NEGATIVE_INTERVIEW = [
+
+"share their thoughts",
+
+"liked your post",
+
+"viewed your profile",
+
+"weekly digest",
+
+"newsletter",
+
+"people you may know"
+
+];
+
 
 class GmailPriority {
 
@@ -124,7 +140,9 @@ class GmailPriority {
         if (email.category === "deadline") score += 20;
 
         if (email.category === "hackathon") score += 10;
-
+        if(NEGATIVE_INTERVIEW.some(k=>text.includes(k))){
+            score -= 100;
+        }
         score = Math.min(score,100);
 
         return score;

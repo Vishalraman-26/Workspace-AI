@@ -1,7 +1,7 @@
 import plan from "../../ai/planner.js";
 import { executeTool } from "../../tools/toolExecutor.js";
 import { generateText } from "../../ai/gemini.js";
-
+import Orchestrator from "../../ai/orchestrator.js";
 class ChatService {
 
     async chat(userId, message) {
@@ -22,6 +22,12 @@ class ChatService {
 
             return await generateText(message);
 
+        }
+        if (planner.action === "orchestrate") {
+            return await Orchestrator.execute(
+                userId,
+                planner.intent
+            );
         }
 
         const toolResult = await executeTool(

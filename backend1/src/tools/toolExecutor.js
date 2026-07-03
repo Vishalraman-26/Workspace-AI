@@ -3,10 +3,12 @@ import { ZodError } from "zod";
 import taskService from "../modules/tasks/task.service.js";
 import GmailService from "../modules/google/gmail.service.js";
 import CalendarService from "../modules/google/calendar.service.js";
+import RAGService from "../modules/rag/rag.service.js";
 export const services = {
     task: taskService,
     gmail: GmailService,
-    calendar: CalendarService
+    calendar: CalendarService,
+    rag: RAGService
 };
 import QueryNormalizer from "./queryNormalizer.js";
 
@@ -34,6 +36,12 @@ export async function executeTool(plan,userId){
                 userId,
                 args
             );
+        }
+        if(plan.tool==="searchKnowledge"){
+
+            return{
+                question:args.question
+            };
         }
         return await  service[tool.method](userId);
     }catch(error){

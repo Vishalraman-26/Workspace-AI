@@ -5,10 +5,7 @@ import TokenService from "./token.service.js";
 class GmailClient {
 
     async getClient(userId) {
-
         const tokens = await TokenService.getGoogleTokens(userId);
-        
-
         oauth2Client.setCredentials({
             access_token: tokens.access_token,
             refresh_token: tokens.refresh_token,

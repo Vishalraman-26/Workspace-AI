@@ -19,6 +19,7 @@ class GoogleController {
         try {
             const emails = await GmailService.fetchInbox(req.user.id);
             res.json(emails);
+            console.log("Fetched emails:", emails);
         } catch (err) {
             res.status(500).json({
                 success: false,

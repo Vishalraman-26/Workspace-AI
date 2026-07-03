@@ -141,20 +141,19 @@ export const toolRegistry = {
 
     },
     
-    searchKnowledge: {
+searchKnowledge: {
 
-        service: "rag",
+    service: "rag",
 
-        method: "searchKnowledge",
+    method: "answer",
 
-        description: "Search the knowledge base.",
+    description: "Search uploaded documents and answer questions.",
 
-        requiresUser: true,
+    requiresUser: true,
 
-        requiresArgs: true
+    requiresArgs: true
 
-    }
-
+},
 };
 
 export default toolRegistry;

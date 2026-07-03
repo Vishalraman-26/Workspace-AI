@@ -3,7 +3,8 @@ import GmailSearchBuilder from "./gmail.search.js";
 import GmailSummarizer from "./gmail.summarizer.js";
 import GmailStatistics from "./gmail.statistics.js";
 import GmailThread from "./gmail.thread.js";
-
+import AttachmentIndexer from "./attachment.indexer.js";
+console.log("AttachmentIndexer:", AttachmentIndexer);
 class GmailService {
 
     async test(userId) {
@@ -55,7 +56,19 @@ class GmailService {
                 email => email.category === options.category
             );
         }
+        for (const email of filteredEmails) {
+            if (!email.attachments?.length) {
+                continue;
+            }
 
+            if (
+                ["interview", "project", "education", "legal"]
+                    .includes(email.category)
+            ) {
+                await AttachmentIndexer.indexEmailAttachments(userId,email);
+            }
+
+        }
         const stats = GmailStatistics.build(filteredEmails);
 
         return {

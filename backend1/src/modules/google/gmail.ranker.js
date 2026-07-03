@@ -8,6 +8,60 @@ import GmailPriority from "./gmail.priority.js";
 import GmailSender from "./gmail.sender.js";
 import GmailOrganization from "./gmail.organization.js";
 
+const HIGH_VALUE_SUBJECTS = [
+    "interview",
+    "technical interview",
+    "hr interview",
+    "interview invitation",
+    "shortlisted",
+    "selected",
+    "offer letter",
+    "assessment",
+    "coding test",
+    "online test",
+    "exam",
+    "deadline",
+    "last date",
+    "meeting",
+    "calendar invite",
+    "google meet",
+    "zoom",
+    "verification",
+    "verify",
+    "verification code",
+    "password reset",
+    "new sign-in",
+    "security alert",
+    "oauth",
+    "authentication",
+    "payment due",
+    "invoice",
+    "receipt"
+];
+
+const LOW_VALUE_SUBJECTS = [
+    "weekly digest",
+    "monthly digest",
+    "newsletter",
+    "people you may know",
+    "suggested",
+    "recommended",
+    "liked your post",
+    "commented on",
+    "shared a post",
+    "viewed your profile",
+    "new follower",
+    "promotion",
+    "sale",
+    "discount",
+    "offer inside",
+    "cashback",
+    "trending",
+    "top stories",
+    "what's new",
+    "release notes"
+];
+
 class GmailRanker {
 
     rank(email) {
@@ -47,11 +101,17 @@ class GmailRanker {
             }
 
         }
-
-        const category = bestCategory;
         const sender = GmailSender.normalize(email.from);
-
         const organization = GmailOrganization.classify(sender.rootDomain);
+        if (
+            bestCategory === "interview" &&
+            ["social", "entertainment"].includes(organization)
+        ) {
+            bestCategory = "general";
+        }
+        const category = bestCategory;
+
+
 
         // ----------------------------------------
         // PRIORITY ENGINE
@@ -64,7 +124,30 @@ class GmailRanker {
             category
 
         });
+        // ----------------------------------------
+        // SUBJECT SCORING
+        // ----------------------------------------
 
+        for (const keyword of HIGH_VALUE_SUBJECTS) {
+
+            if (text.includes(keyword)) {
+
+                priority += 20;
+
+            }
+
+        }
+
+        for (const keyword of LOW_VALUE_SUBJECTS) {
+
+            if (text.includes(keyword)) {
+
+                priority -= 30;
+
+            }
+
+        }
+        priority += GmailOrganization.getScore(organization);
         // ----------------------------------------
         // IMPORTANT SENDERS BOOST
         // ----------------------------------------
@@ -101,15 +184,57 @@ class GmailRanker {
             priority -= 20;
 
         }
-
+        
         priority = Math.max(0, Math.min(priority, 100));
 
         // ----------------------------------------
         // ACTION REQUIRED
         // ----------------------------------------
 
-        const actionRequired = priority >= 70;
+        const ACTION_KEYWORDS = [
+            "verify",
+            "verification",
+            "confirm",
+            "complete",
+            "join",
+            "schedule",
+            "respond",
+            "accept",
+            "submit",
+            "expires",
+            "deadline",
+            "payment due",
+            "interview",
+            "assessment",
+            "security alert",
+            "new sign-in"
+        ];
 
+        const actionRequired =
+
+            priority >= 75 ||
+
+            ACTION_KEYWORDS.some(keyword =>
+                text.includes(keyword)
+            );
+        const aiRelevant = (
+
+            priority >= 60 ||
+
+            actionRequired ||
+
+            [
+                "interview",
+                "meeting",
+                "deadline",
+                "exam",
+                "security",
+                "payment",
+                "finance",
+                "project"
+            ].includes(category)
+
+        );
         //console.log("========== CATEGORY ==========");
         //console.log({subject: email.subject,category,priority,organization});
         return {
@@ -124,7 +249,9 @@ class GmailRanker {
 
             priority,
 
-            actionRequired
+            actionRequired,
+
+            aiRelevant
 
         };
 
