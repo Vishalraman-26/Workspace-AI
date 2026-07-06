@@ -25,12 +25,13 @@ const upload = multer({ storage });
 router.post(
 
     "/upload",
-
+    authenticate,
     upload.single("document"),
     (req, res, next) => {
         console.log("FILE:", req.file);
         next();
     },
+    
     Controller.upload
 
 );

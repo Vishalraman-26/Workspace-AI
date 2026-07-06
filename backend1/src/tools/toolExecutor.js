@@ -14,7 +14,6 @@ import QueryNormalizer from "./queryNormalizer.js";
 
 export async function executeTool(plan,userId){
     try{
-        console.log(plan);
         const tool = toolRegistry[plan.tool];
         if(!tool){
             throw new Error("Unknown Tool");

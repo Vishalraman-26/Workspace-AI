@@ -28,7 +28,7 @@ class GmailFetcher {
             pageToken: searchOptions.pageToken
 
         });
-
+        console.log("GMAIL RAW RESPONSE:", data);
         return {
 
             messages: data.messages || [],
@@ -74,7 +74,7 @@ class GmailFetcher {
                 b.priority - a.priority ||
                 new Date(b.date) - new Date(a.date)
         );
-
+        console.log("GMAIL EMAILS:", emails);
         return emails;
     }
 

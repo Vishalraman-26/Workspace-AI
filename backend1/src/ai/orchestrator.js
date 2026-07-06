@@ -60,7 +60,11 @@ class Orchestrator {
         const prompt =
             WorkspacePrompt.dailySummary(context)
 
-        return await generateText(prompt);
+        const reply = await generateText(prompt);
+
+        await ConversationService.save(userId,sessionId,"assistant",reply,planner.tool);
+
+        return reply;
 
     }
 
@@ -86,7 +90,11 @@ class Orchestrator {
         const prompt =
             WorkspacePrompt.prepareTomorrow(context)
 
-        return await generateText(prompt);
+        const reply = await generateText(prompt);
+
+        await ConversationService.save(userId,sessionId,"assistant",reply,planner.tool);
+
+        return reply;
 
     }
     async urgentToday(userId){
@@ -111,7 +119,13 @@ class Orchestrator {
         const prompt =
             WorkspacePrompt.urgentToday(context)
 
-        return await generateText(prompt);
+        const reply = await generateText(Prompt);
+
+        await ConversationService.save(userId,sessionId,"assistant",reply,planner.tool);
+
+        return reply;
+
+        
 
     }
     async prepareInterview(userId) {
@@ -134,7 +148,11 @@ class Orchestrator {
 
         const prompt = WorkspacePrompt.prepareInterview(context);
 
-        return await generateText(prompt);
+        const reply = await generateText(Prompt);
+
+        await ConversationService.save(userId,sessionId,"assistant",reply,planner.tool);
+
+        return reply;
 
     }
     async meetingTasks(userId) {
@@ -148,7 +166,13 @@ class Orchestrator {
         });
 
         const prompt = WorkspacePrompt.meetingTasks(context);
-        return await generateText(prompt);
+        const reply = await generateText(Prompt);
+
+        await ConversationService.save(userId,sessionId,"assistant",reply,planner.tool);
+
+        return reply;
+
+        
 
     }
     async relatedEmails(userId){
@@ -168,7 +192,11 @@ class Orchestrator {
 
         const prompt = WorkspacePrompt.relatedEmails(context);
 
-        return await generateText(prompt);
+        const reply = await generateText(Prompt);
+
+        await ConversationService.save(userId,sessionId,"assistant",reply,planner.tool);
+
+        return reply;
 
     }
     async dailyBriefing(userId){
@@ -190,7 +218,13 @@ class Orchestrator {
 
         const prompt = WorkspacePrompt.dailyBriefing(context);
 
-        return await generateText(prompt);
+        const reply = await generateText(Prompt);
+
+        await ConversationService.save(userId,sessionId,"assistant",reply,planner.tool);
+
+        return reply;
+
+        
 
     }
 

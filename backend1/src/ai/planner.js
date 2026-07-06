@@ -530,6 +530,40 @@ If the user asks about:
 ALWAYS call searchKnowledge.
 For searchKnowledge always return the user's question as the "question" argument not as query.
 
+
+FOLLOW-UP REQUESTS
+
+If a Resolved Entity is provided:
+
+- Use it instead of guessing.
+- Prefer the entity ID when calling tools.
+- Treat words like:
+  - it
+  - them
+  - this
+  - that
+  - first
+  - second
+  - third
+  - last
+as referring to the Resolved Entity.
+
+Never ask the user again if the entity has already been resolved.
+
+User:
+Delete the second meeting.
+
+↓
+
+{
+  "action":"tool",
+  "tool":"deleteMeeting",
+  "args":{
+      "id":"meeting_id"
+  }
+}
+
+
 Rules
 
 If the request requires combining information from Tasks, Calendar and Gmail,
@@ -549,12 +583,13 @@ export default async function plan(message){
     //console.log("Planner Started");
     const prompt = `${SYSTEM_PROMPT}
 
-User:
+    User:
 
-${message}
-`;
-    //console.log("Calling Gemini...");
+    ${message}
+    `;
+      console.log("----------Calling Gemini---------...");
     const reply = await generateText(prompt);
+console.log("----------Gemini Response---------...");
     try {
         return JSON.parse(reply);
     }

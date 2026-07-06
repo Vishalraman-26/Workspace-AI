@@ -7,8 +7,18 @@ import { generateText } from "../../ai/gemini.js";
 
 class RAGService {
 
-    async indexDocument(filePath,metadata = {}) {
-
+    async indexDocument(userId, email, filePath,metadata = {}) {
+        const exists = await VectorStore.documentExists(
+            userId,
+            metadata.filename
+        );
+        
+        if (exists) {
+            return {
+                success: false,
+                message: "Document already uploaded."
+            };
+        }
         const document =
             await DocumentLoader.load(filePath);
 
@@ -24,22 +34,26 @@ class RAGService {
 
             vectors.push({
 
-                title: document.title,
-
-                chunk: chunk.text,
-
-                embedding,
-
-                metadata: {
-
-                    ...metadata,
-
-                    chunk: chunk.index,
-
-                    indexedAt: new Date().toISOString()
-
-                }
-
+                    user_id: userId,
+                
+                    email: email,
+                
+                    title: metadata.filename,
+                
+                    chunk: chunk.text,
+                
+                    embedding,
+                
+                    metadata: {
+                
+                        ...metadata,
+                
+                        chunk: chunk.index,
+                
+                        indexedAt: new Date().toISOString()
+                
+                    }
+                
             });
 
         }
@@ -57,9 +71,9 @@ class RAGService {
 
     }
 
-    async searchKnowledge(question) {
+    async searchKnowledge(userId,question) {
 
-        return await Retriever.retrieve(question);
+        return await Retriever.retrieve(userId,question);
 
     }
 
@@ -68,7 +82,7 @@ class RAGService {
         const question=args.question;
 
         const chunks=
-            await Retriever.retrieve(question);
+            await Retriever.retrieve(userId,question);
         chunks.sort((a, b) => a.metadata.chunk - b.metadata.chunk);
         if (!chunks.length) {
 

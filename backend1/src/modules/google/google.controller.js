@@ -7,12 +7,26 @@ class GoogleController {
     }
 
     async callback(req, res) {
-    const { code, state } = req.query;
-    const result = await GoogleService.handleCallback(
-        code,
-        state
-    );
-    res.json(result);
+        try {
+            const { code, state } = req.query;
+    
+            const result = await GoogleService.handleCallback(
+                code,
+                state
+            );
+    
+            res.redirect("http://localhost:5173/dashboard");
+    
+        } catch (err) {
+            console.error("GOOGLE CALLBACK ERROR:");
+            console.error(err);
+    
+            res.status(500).json({
+                success: false,
+                message: err.message,
+                error: err
+            });
+        }
     }
 
     async fetchInbox(req, res) {

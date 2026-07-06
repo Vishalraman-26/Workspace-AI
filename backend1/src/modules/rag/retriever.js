@@ -3,13 +3,14 @@ import VectorStore from "./vector.store.js";
 
 class Retriever {
 
-    async retrieve(question, filters = {}, topK = 5) {
+    async retrieve(userId,question, filters = {}, topK = 5) {
 
         const embedding =
             await Embedding.generate(question);
   
             const results =
                 await VectorStore.search(
+                    userId,
                     embedding,
                     topK
                 );

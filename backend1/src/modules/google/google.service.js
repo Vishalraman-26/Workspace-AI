@@ -28,7 +28,8 @@ class GoogleService {
     async handleCallback(code, state) {
 
         const { tokens } = await oauth2Client.getToken(code);
-
+        console.log("TOKENS:");
+        console.log(tokens);
         const userId = Buffer
             .from(state, "base64")
             .toString();
@@ -43,7 +44,7 @@ class GoogleService {
                 scope: tokens.scope,
                 token_type: tokens.token_type
             });
-
+        console.log("SUPABASE ERROR:", error);
         if (error) {
             throw error;
         }

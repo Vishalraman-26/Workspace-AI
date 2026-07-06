@@ -123,8 +123,11 @@ class GmailSearchBuilder {
             query.push(`label:${filters.label}`);
 
         }
-        query.push("category:primary");
-
+        if (filters.primary) {
+            query.push("category:primary");
+        }
+        //query.push("category:primary");
+        console.log("Gmail Query:", query);
         return {
             query: query.join(" "),
             maxResults:filters.maxResults ?? 20,

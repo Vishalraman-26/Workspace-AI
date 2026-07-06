@@ -1,108 +1,74 @@
-// src/services/api.js
-const API_BASE_URL = 'http://localhost:5000/api';
+import axios from 'axios';
+import {
+  TOKEN_KEY,
+  USER_KEY,
+  clearAuthSession,
+  extractAuthPayload,
+  getStoredToken,
+  persistAuthSession,
+} from '../utils/auth';
+import { buildApiUrl, getApiBaseUrl, redirectToGoogleOAuth } from '../utils/googleOAuth';
 
-export const api = {
-    // Health Check
-    health: async () => {
-        const response = await fetch(`${API_BASE_URL}/health`);
-        return response.json();
-    },
+const API_BASE_URL = getApiBaseUrl();
 
-    // Emails
-    getEmails: async (params = {}) => {
-        const query = new URLSearchParams(params).toString();
-        const response = await fetch(`${API_BASE_URL}/emails${query ? `?${query}` : ''}`);
-        if (!response.ok) throw new Error('Failed to get emails');
-        return response.json();
-    },
-    markEmailRead: async (emailId) => {
-        const response = await fetch(`${API_BASE_URL}/emails/${emailId}/read`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' }
-        });
-        if (!response.ok) throw new Error('Failed to mark email as read');
-        return response.json();
-    },
+const api = axios.create({
+  baseURL: buildApiUrl('/api'),
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
-    // Calendar Events
-    getEvents: async () => {
-        const response = await fetch(`${API_BASE_URL}/calendar`);
-        if (!response.ok) throw new Error('Failed to get events');
-        return response.json();
-    },
-    createEvent: async (eventData) => {
-        const response = await fetch(`${API_BASE_URL}/calendar`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(eventData)
-        });
-        if (!response.ok) throw new Error('Failed to create event');
-        return response.json();
-    },
-    deleteEvent: async (eventId) => {
-        const response = await fetch(`${API_BASE_URL}/calendar/${eventId}`, {
-            method: 'DELETE'
-        });
-        if (!response.ok) throw new Error('Failed to delete event');
-        return response.json();
-    },
+api.interceptors.request.use((config) => {
+  const token = getStoredToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
-    // Tasks
-    getTasks: async () => {
-        const response = await fetch(`${API_BASE_URL}/tasks`);
-        if (!response.ok) throw new Error('Failed to get tasks');
-        return response.json();
-    },
-    createTask: async (taskData) => {
-        const response = await fetch(`${API_BASE_URL}/tasks`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(taskData)
-        });
-        if (!response.ok) throw new Error('Failed to create task');
-        return response.json();
-    },
-    updateTaskStatus: async (taskId, status) => {
-        const response = await fetch(`${API_BASE_URL}/tasks/${taskId}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status })
-        });
-        if (!response.ok) throw new Error('Failed to update task status');
-        return response.json();
-    },
-
-    // Approvals
-    getApprovals: async () => {
-        const response = await fetch(`${API_BASE_URL}/agent/approvals`);
-        if (!response.ok) throw new Error('Failed to get approvals');
-        return response.json();
-    },
-    approve: async (approvalId) => {
-        const response = await fetch(`${API_BASE_URL}/agent/approvals/${approvalId}/approve`, {
-            method: 'POST'
-        });
-        if (!response.ok) throw new Error('Failed to approve action');
-        return response.json();
-    },
-    reject: async (approvalId) => {
-        const response = await fetch(`${API_BASE_URL}/agent/approvals/${approvalId}/reject`, {
-            method: 'POST'
-        });
-        if (!response.ok) throw new Error('Failed to reject action');
-        return response.json();
-    },
-
-    // Agent Chat
-    chat: async (messages) => {
-        const response = await fetch(`${API_BASE_URL}/agent/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ messages })
-        });
-        if (!response.ok) throw new Error('Failed to send message to agent');
-        return response.json();
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      clearAuthSession();
+      if (window.location.pathname !== '/login' && !window.location.pathname.startsWith('/auth/')) {
+        window.location.href = '/login';
+      }
     }
+    return Promise.reject(error);
+  }
+);
+
+export const authApi = {
+  login: (email, password) => api.post('/auth/login', { email, password }),
+
+  register: (email, password) => api.post('/auth/register', { email, password }),
+
+  loginWithGoogle: () => {
+    const token = getStoredToken();
+    if (token) {
+      redirectToGoogleOAuth({ endpoint: '/api/google/connect', requiresAuth: true });
+      return;
+    }
+    window.location.assign(buildApiUrl('/api/auth/google'));
+  },
+
+  logout: async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch {
+      // Client-side logout still proceeds if backend logout is unavailable.
+    } finally {
+      clearAuthSession();
+    }
+  },
+
+  connectGoogle: () =>
+    redirectToGoogleOAuth({
+      endpoint: '/api/google/connect',
+      requiresAuth: true,
+    }),
 };
 
+export { persistAuthSession, clearAuthSession, TOKEN_KEY, USER_KEY, extractAuthPayload, API_BASE_URL };
 export default api;

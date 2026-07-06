@@ -6,16 +6,16 @@ export async function upload(req,res){
     const result=
         await RAGService.indexDocument(
 
+            req.user.id,
+            req.user.email,
             req.file.path,
             {
                 source: "manual",
-
                 documentType: "document",
-
-                filename: file.originalname,
-
+                filename: req.file.originalname,
                 uploadedAt: new Date().toISOString()
             }
+        
 
         );
 

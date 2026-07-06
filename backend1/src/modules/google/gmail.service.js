@@ -61,12 +61,12 @@ class GmailService {
                 continue;
             }
 
-            if (
+            /*if (
                 ["interview", "project", "education", "legal"]
                     .includes(email.category)
             ) {
                 await AttachmentIndexer.indexEmailAttachments(userId,email);
-            }
+            }*/
 
         }
         const stats = GmailStatistics.build(filteredEmails);
