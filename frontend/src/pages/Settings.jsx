@@ -48,12 +48,12 @@ export default function Settings() {
           <div className="wa-card p-4 h-100">
             <h5 className="mb-4">Profile</h5>
             <div className="mb-3">
-              <div className="small text-muted">Email</div>
-              <div className="fw-medium">{user?.email || 'Not available'}</div>
+              <div className="small text-muted">Full Name</div>
+              <div className="fw-medium">{user?.name || 'Not available'}</div>
             </div>
             <div className="mb-3">
-              <div className="small text-muted">User ID</div>
-              <div className="text-break small">{user?.id || 'Not available'}</div>
+              <div className="small text-muted">Email</div>
+              <div className="fw-medium">{user?.email || 'Not available'}</div>
             </div>
           </div>
         </Col>

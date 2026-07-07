@@ -4,13 +4,13 @@ export async function register(req, res) {
 
     try {
 
-        const { email, password } = req.body;
+        const { name, email, password } = req.body;
 
-        const user =
-            await authService.register(
-                email,
-                password
-            );
+        const user = await authService.register(
+            name,
+            email,
+            password
+        );
 
         return res.json({
 

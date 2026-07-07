@@ -1,5 +1,5 @@
 import { Button } from 'react-bootstrap';
-import { FiPlus, FiTrash2 } from 'react-icons/fi';
+import { FiMessageSquare, FiPlus, FiTrash2 } from 'react-icons/fi';
 import { formatRelative } from '../../utils/date';
 
 export default function ConversationList({
@@ -15,50 +15,61 @@ export default function ConversationList({
     <>
       {show && (
         <div
-          className="d-lg-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50"
-          style={{ zIndex: 1025 }}
+          className="wa-chat-overlay d-lg-none"
           onClick={onClose}
           aria-hidden="true"
         />
       )}
 
       <div className={`wa-chat-sidebar d-flex flex-column ${show ? 'show' : ''}`}>
-        <div className="p-3 border-bottom">
-          <Button variant="primary" className="w-100 d-flex align-items-center justify-content-center gap-2" onClick={onCreate}>
-            <FiPlus />
+        <div className="wa-chat-sidebar-header">
+          <div className="wa-chat-sidebar-title">Conversations</div>
+          <Button
+            variant="primary"
+            className="w-100 wa-chat-new-btn d-flex align-items-center justify-content-center gap-2"
+            onClick={onCreate}
+          >
+            <FiPlus size={16} />
             New Chat
           </Button>
         </div>
 
-        <div className="flex-grow-1 overflow-auto p-2">
+        <div className="wa-chat-sessions">
           {sessions.length === 0 ? (
-            <div className="text-muted small text-center p-3">No conversations yet</div>
+            <div className="wa-chat-sidebar-empty">
+              <FiMessageSquare size={24} className="mb-2 opacity-50" />
+              <div>No conversations yet</div>
+            </div>
           ) : (
-            sessions.map((session) => (
-              <div
-                key={session.id}
-                className={`d-flex align-items-center gap-2 p-2 rounded mb-1 ${
-                  session.id === activeSessionId ? 'bg-primary bg-opacity-10' : ''
-                }`}
-              >
-                <button
-                  type="button"
-                  className="btn btn-link text-start flex-grow-1 p-0 text-decoration-none text-body"
-                  onClick={() => onSelect(session.id)}
+            sessions.map((session) => {
+              const isActive = session.id === activeSessionId;
+
+              return (
+                <div
+                  key={session.id}
+                  className={`wa-chat-session-item ${isActive ? 'active' : ''}`}
                 >
-                  <div className="fw-medium text-truncate">{session.title}</div>
-                  <div className="small text-muted">{formatRelative(session.updatedAt)}</div>
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-link btn-sm text-muted p-1"
-                  onClick={() => onDelete(session.id)}
-                  aria-label="Delete conversation"
-                >
-                  <FiTrash2 size={14} />
-                </button>
-              </div>
-            ))
+                  <button
+                    type="button"
+                    className="wa-chat-session-btn"
+                    onClick={() => onSelect(session.id)}
+                  >
+                    <div className="wa-chat-session-title">{session.title}</div>
+                    <div className="wa-chat-session-meta">
+                      {formatRelative(session.updatedAt)}
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    className="wa-chat-session-delete"
+                    onClick={() => onDelete(session.id)}
+                    aria-label="Delete conversation"
+                  >
+                    <FiTrash2 size={14} />
+                  </button>
+                </div>
+              );
+            })
           )}
         </div>
       </div>

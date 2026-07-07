@@ -1,43 +1,51 @@
+import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
+
 class Chunker {
 
-    chunk(text, options = {}) {
+    constructor() {
 
-        const chunkSize = options.chunkSize ?? 1200;
-        const overlap = options.overlap ?? 200;
+        this.splitter = new RecursiveCharacterTextSplitter({
 
-        const chunks = [];
+            chunkSize: 1000,
 
-        let start = 0;
+            chunkOverlap: 200,
 
-        while (start < text.length) {
+            separators: [
 
-            let end = start + chunkSize;
+                "\n\n",
 
-            if (end < text.length) {
+                "\n",
 
-                const lastPeriod = text.lastIndexOf(".", end);
+                ". ",
 
-                if (lastPeriod > start) {
+                " ",
 
-                    end = lastPeriod + 1;
+                ""
 
-                }
+            ]
 
-            }
+        });
 
-            chunks.push({
+    }
 
-                index: chunks.length,
+    async chunk(text) {
 
-                text: text.slice(start, end).trim()
+        if (!text?.trim()) {
 
-            });
-
-            start = end - overlap;
+            return [];
 
         }
 
-        return chunks;
+        const documents =
+            await this.splitter.createDocuments([text]);
+
+        return documents.map((doc, index) => ({
+
+            index,
+
+            text: doc.pageContent
+
+        }));
 
     }
 

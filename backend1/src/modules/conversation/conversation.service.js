@@ -24,24 +24,33 @@ class ConversationService {
 
     }
 
-    async history(userId, sessionId, limit = 10) {
+    async history(userId, sessionId, limit = 1000) {
 
         const { data, error } = await supabase
             .from("conversations")
-            .select("role,message")
+            .select("id, role, message, created_at")
             .eq("user_id", userId)
             .eq("session_id", sessionId)
             .order("created_at", {
-                ascending: false
+                ascending: true
             })
             .limit(limit);
-
+    
         if (error) throw error;
-
-        return data.reverse();
-
+    
+        return data.map(message => ({
+    
+            id: message.id,
+    
+            role: message.role,
+    
+            content: message.message,
+    
+            timestamp: message.created_at
+    
+        }));
+    
     }
-
     async clear(userId, sessionId) {
 
         await supabase

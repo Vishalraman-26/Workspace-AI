@@ -1,14 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Row, Col } from 'react-bootstrap';
 import ragApi from '../services/rag.api';
-import useDocumentStore from '../hooks/useDocumentStore';
 import DocumentUpload, { DocumentList } from '../components/rag/DocumentUpload';
 import RagQueryPanel from '../components/rag/RagQueryPanel';
 import ErrorAlert from '../components/common/ErrorAlert';
 import { getErrorMessage } from '../utils/helpers';
 
 export default function Knowledge() {
-  const { documents, addDocument, removeDocument } = useDocumentStore();
+
+  const [documents, setDocuments] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState(null);
@@ -17,7 +17,18 @@ export default function Knowledge() {
   const [asking, setAsking] = useState(false);
   const [askError, setAskError] = useState(null);
   const [lastSource, setLastSource] = useState(null);
-
+  useEffect(() => {
+    loadDocuments();
+  }, []);
+  const loadDocuments = async () => {
+    try {
+      const { data } = await ragApi.getDocuments();
+      setDocuments(data);
+    } catch (err) {
+      console.error("Error loading documents:", err);
+      setDocuments([]);
+    }
+  };  
   const handleUpload = async (file) => {
     setUploading(true);
     setUploadProgress(0);
@@ -29,12 +40,7 @@ export default function Knowledge() {
         setUploadProgress(percent);
       });
 
-      addDocument({
-        id: `doc_${Date.now()}`,
-        name: file.name,
-        chunks: data.chunks,
-        uploadedAt: new Date().toISOString(),
-      });
+      await loadDocuments();
     } catch (err) {
       setUploadError(getErrorMessage(err, 'Upload failed'));
     } finally {
@@ -58,7 +64,38 @@ export default function Knowledge() {
       setAsking(false);
     }
   };
+  const removeDocument = async (title) => {
 
+    const confirmed = window.confirm(
+
+        `Delete "${title}"?`
+
+    );
+
+    if (!confirmed) return;
+
+    try {
+        console.log(title)
+
+        await ragApi.deleteDocument(title);
+
+        await loadDocuments();
+
+        if (lastSource === title) {
+
+            setAnswer("");
+
+            setLastSource(null);
+
+        }
+
+    } catch (err) {
+
+        alert(getErrorMessage(err, "Failed to delete document"));
+
+    }
+
+};
   return (
     <div>
       <div className="mb-4">

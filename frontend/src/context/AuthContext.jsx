@@ -10,6 +10,7 @@ import { authApi, persistAuthSession, clearAuthSession, extractAuthPayload } fro
 import {
   getStoredToken,
   getStoredUser,
+  getStoredSession,
   isGoogleConnected,
   markGoogleConnected,
   clearGoogleConnected,
@@ -19,6 +20,7 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(getStoredUser);
+  const [session, setSession] = useState(getStoredSession);
   const [token, setToken] = useState(getStoredToken);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -29,13 +31,15 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (!token) {
       setUser(null);
+      setSession(null);
     }
   }, [token]);
 
-  const applySession = useCallback((nextToken, nextUser) => {
-    persistAuthSession({ token: nextToken, user: nextUser });
+  const applySession = useCallback((nextToken, nextUser, nextSession) => {
+    persistAuthSession({ token: nextToken, user: nextUser, session: nextSession });
     setToken(nextToken);
     setUser(nextUser);
+    setSession(nextSession);
     setError(null);
   }, []);
 
@@ -49,13 +53,13 @@ export function AuthProvider({ children }) {
         throw new Error(data.message || 'Login failed');
       }
 
-      const { token: jwt, user: authUser } = extractAuthPayload(data);
+      const { token: jwt, user: authUser, session: authSession } = extractAuthPayload(data);
 
       if (!jwt) {
         throw new Error('Login failed. No token received from server.');
       }
 
-      applySession(jwt, authUser || { email });
+      applySession(jwt, authUser, authSession);
       return data;
     } catch (err) {
       const message = err.response?.data?.message || err.message || 'Login failed';
@@ -66,11 +70,11 @@ export function AuthProvider({ children }) {
     }
   }, [applySession]);
 
-  const register = useCallback(async (email, password) => {
+  const register = useCallback(async (name, email, password) => {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await authApi.register(email, password);
+      const { data } = await authApi.register(name, email, password);
       if (data?.success === false) {
         throw new Error(data.message || 'Registration failed');
       }
@@ -90,13 +94,13 @@ export function AuthProvider({ children }) {
   }, []);
 
   const completeAuthCallback = useCallback((responseData) => {
-    const { token: jwt, user: authUser } = extractAuthPayload(responseData);
+    const { token: jwt, user: authUser, session: authSession } = extractAuthPayload(responseData);
 
     if (!jwt) {
       throw new Error('Sign in failed. No token received.');
     }
 
-    applySession(jwt, authUser);
+    applySession(jwt, authUser, authSession);
   }, [applySession]);
 
   const logout = useCallback(async () => {
@@ -107,6 +111,7 @@ export function AuthProvider({ children }) {
       clearAuthSession();
       setToken(null);
       setUser(null);
+      setSession(null);
       setGoogleConnected(false);
       setError(null);
       setLoading(false);
@@ -130,6 +135,7 @@ export function AuthProvider({ children }) {
   const value = useMemo(
     () => ({
       user,
+      session,
       token,
       loading,
       error,
@@ -146,6 +152,7 @@ export function AuthProvider({ children }) {
     }),
     [
       user,
+      session,
       token,
       loading,
       error,

@@ -12,15 +12,14 @@ import {
 import gmailApi from '../services/gmail.api';
 import calendarApi from '../services/calendar.api';
 import taskApi from '../services/task.api';
-import useDocumentStore from '../hooks/useDocumentStore';
 import { ConnectGoogleCard } from '../components/common/ConnectGoogleScreen';
 import ErrorAlert from '../components/common/ErrorAlert';
 import { SkeletonList } from '../components/common/SkeletonLoader';
 import { formatRelative } from '../utils/date';
-import dayjs from '../utils/date';
+import { extractCalendarEvents, getTodayEvents } from '../components/calendar/eventUtils';
 import { isGoogleNotConnectedError } from '../utils/auth';
 import { useAuth } from '../context/AuthContext';
-
+import ragApi from '../services/rag.api';
 function StatCard({ icon: Icon, label, value, color, loading }) {
   return (
     <div className="wa-card wa-card-hover p-4 h-100">
@@ -40,7 +39,7 @@ function StatCard({ icon: Icon, label, value, color, loading }) {
 }
 
 export default function Dashboard() {
-  const { documents } = useDocumentStore();
+  const [documents, setDocuments] = useState([]);
   const { googleConnected, setGoogleConnectionStatus } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -49,7 +48,7 @@ export default function Dashboard() {
     unreadEmails: 0,
     todayMeetings: 0,
     pendingTasks: 0,
-    documents: documents.length,
+    documents: 0,
   });
   const [activity, setActivity] = useState([]);
 
@@ -59,7 +58,8 @@ export default function Dashboard() {
     setGoogleNotConnected(false);
 
     try {
-      const [inboxRes, calendarRes, tasksRes] = await Promise.allSettled([
+      const [docsRes, inboxRes, calendarRes, tasksRes] = await Promise.allSettled([
+        ragApi.getDocuments(),
         gmailApi.getInbox(),
         calendarApi.getEvents(),
         taskApi.getTasks(),
@@ -88,7 +88,14 @@ export default function Dashboard() {
       ) {
         setGoogleConnectionStatus(true);
       }
+      let documentCount = 0;
 
+      if (docsRes.status === "fulfilled") {
+        setDocuments(docsRes.value.data);
+        documentCount = docsRes.value.data.length;
+      }else{
+        documentCount = 0;
+      }
       let unreadEmails = 0;
       let emailActivity = [];
       if (inboxRes.status === 'fulfilled') {
@@ -105,8 +112,8 @@ export default function Dashboard() {
       let todayMeetings = 0;
       let meetingActivity = [];
       if (calendarRes.status === 'fulfilled') {
-        const events = calendarRes.value.data?.events || [];
-        todayMeetings = events.filter((event) => dayjs(event.start).isSame(dayjs(), 'day')).length;
+        const events = extractCalendarEvents(calendarRes.value.data);
+        todayMeetings = getTodayEvents(events).length;
         meetingActivity = events.slice(0, 3).map((event) => ({
           id: event.id,
           type: 'meeting',
@@ -134,7 +141,7 @@ export default function Dashboard() {
         unreadEmails,
         todayMeetings,
         pendingTasks,
-        documents: documents.length,
+        documents: documentCount,
       });
 
       setActivity(
@@ -151,7 +158,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchDashboard();
-  }, [documents.length]);
+}, []);
 
   const showConnectCard = googleNotConnected || !googleConnected;
 

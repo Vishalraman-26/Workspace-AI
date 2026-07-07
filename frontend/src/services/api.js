@@ -42,7 +42,7 @@ api.interceptors.response.use(
 export const authApi = {
   login: (email, password) => api.post('/auth/login', { email, password }),
 
-  register: (email, password) => api.post('/auth/register', { email, password }),
+  register: (name, email, password) => api.post('/auth/register', { name, email, password }),
 
   loginWithGoogle: () => {
     const token = getStoredToken();

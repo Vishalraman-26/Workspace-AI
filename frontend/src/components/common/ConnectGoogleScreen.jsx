@@ -86,6 +86,6 @@ export default function ConnectGoogleScreen({
   );
 }
 
-export function ConnectGoogleCard() {
-  return <ConnectGoogleScreen compact />;
+export function ConnectGoogleCard(props) {
+  return <ConnectGoogleScreen compact {...props} />;
 }

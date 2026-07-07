@@ -1,21 +1,33 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Row, Col, Button } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import { FiPlus } from 'react-icons/fi';
 import taskApi from '../services/task.api';
-import TaskCard, { TaskFilters } from '../components/tasks/TaskCard';
+import useCalendarEvents from '../components/calendar/useCalendarEvents';
+import TaskCard from '../components/tasks/TaskCard';
+import TaskStatsCards from '../components/tasks/TaskStatsCards';
+import TodayEventsPanel from '../components/tasks/TodayEventsPanel';
+import CompletedTasksSection from '../components/tasks/CompletedTasksSection';
 import TaskFormModal from '../components/tasks/TaskFormModal';
 import ConfirmModal from '../components/common/ConfirmModal';
 import ErrorAlert from '../components/common/ErrorAlert';
 import EmptyState from '../components/common/EmptyState';
 import { SkeletonList } from '../components/common/SkeletonLoader';
+import { getTodayEvents } from '../components/calendar/eventUtils';
 import { getErrorMessage } from '../utils/helpers';
+import '../styles/productivity.css';
 
 export default function Tasks() {
+  const {
+    events: calendarEvents,
+    loading: eventsLoading,
+    error: eventsError,
+    notConnected: calendarNotConnected,
+    fetchEvents: fetchCalendarEvents,
+  } = useCalendarEvents();
+
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [search, setSearch] = useState('');
-  const [priority, setPriority] = useState('all');
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -39,15 +51,22 @@ export default function Tasks() {
     fetchTasks();
   }, []);
 
-  const filteredTasks = useMemo(() => {
-    return tasks.filter((task) => {
-      const matchesPriority = priority === 'all' || task.priority === priority;
-      const matchesSearch =
-        !search.trim() ||
-        [task.title, task.description].filter(Boolean).join(' ').toLowerCase().includes(search.toLowerCase());
-      return matchesPriority && matchesSearch;
-    });
-  }, [tasks, search, priority]);
+  const pendingTasks = useMemo(
+    () => tasks.filter((task) => !task.completed),
+    [tasks]
+  );
+
+  const completedTasks = useMemo(
+    () => tasks.filter((task) => task.completed),
+    [tasks]
+  );
+
+  const stats = useMemo(() => ({
+    total: tasks.length,
+    pending: pendingTasks.length,
+    completed: completedTasks.length,
+    todayEvents: getTodayEvents(calendarEvents).length,
+  }), [tasks, pendingTasks, completedTasks, calendarEvents]);
 
   const openCreateModal = () => {
     setSelectedTask(null);
@@ -101,43 +120,78 @@ export default function Tasks() {
 
   return (
     <div>
-      <div className="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+      <div className="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4 wa-fade-in">
         <div>
           <h2 className="h4 fw-semibold mb-1">Tasks</h2>
-          <p className="text-muted mb-0">Track and manage your work with priority-aware task cards</p>
+          <p className="text-muted mb-0">
+            Your work queue — calendar, active tasks, and completed work
+          </p>
         </div>
-        <Button variant="primary" className="d-flex align-items-center gap-2" onClick={openCreateModal}>
-          <FiPlus />
-          Create Task
-        </Button>
       </div>
 
       <ErrorAlert message={error} onRetry={fetchTasks} className="mb-4" />
 
-      <TaskFilters
-        search={search}
-        priority={priority}
-        onSearchChange={setSearch}
-        onPriorityChange={setPriority}
+      <TaskStatsCards stats={stats} loading={loading || eventsLoading} />
+
+      <TodayEventsPanel
+        events={calendarEvents}
+        loading={eventsLoading}
+        error={eventsError}
+        notConnected={calendarNotConnected}
+        onRetry={fetchCalendarEvents}
       />
 
-      {loading ? (
-        <SkeletonList count={6} />
-      ) : filteredTasks.length === 0 ? (
-        <EmptyState title="No tasks found" description="Create a task or adjust your filters." />
-      ) : (
-        <Row className="g-3">
-          {filteredTasks.map((task) => (
-            <Col md={6} xl={4} key={task.id}>
+      <section className="wa-work-section wa-fade-in">
+        <div className="wa-work-section-header">
+          <div>
+            <h3 className="wa-work-section-title">My Tasks</h3>
+            <p className="text-muted small mb-0">Active items in your work queue</p>
+          </div>
+          <Button
+            variant="primary"
+            size="sm"
+            className="d-flex align-items-center gap-2"
+            onClick={openCreateModal}
+          >
+            <FiPlus size={16} />
+            Add Task
+          </Button>
+        </div>
+
+        {loading ? (
+          <SkeletonList count={4} />
+        ) : pendingTasks.length === 0 ? (
+          <EmptyState
+            title="No pending tasks"
+            description="Add a task to start building your work queue."
+            action={
+              <Button variant="primary" size="sm" onClick={openCreateModal}>
+                Add Task
+              </Button>
+            }
+          />
+        ) : (
+          <div className="d-flex flex-column gap-3">
+            {pendingTasks.map((task) => (
               <TaskCard
+                key={task.id}
                 task={task}
                 onEdit={openEditModal}
                 onDelete={setDeleteTarget}
                 onToggleComplete={handleToggleComplete}
               />
-            </Col>
-          ))}
-        </Row>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {!loading && (
+        <CompletedTasksSection
+          tasks={completedTasks}
+          onEdit={openEditModal}
+          onDelete={setDeleteTarget}
+          onToggleComplete={handleToggleComplete}
+        />
       )}
 
       <TaskFormModal

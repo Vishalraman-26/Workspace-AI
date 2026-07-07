@@ -28,11 +28,11 @@ export default function Header({ onMenuClick }) {
 
       <div className="d-flex align-items-center gap-3">
         <div className="text-end d-none d-sm-block">
-          <div className="small fw-medium">{user?.email || 'User'}</div>
-          <div className="small text-muted">Pro Plan</div>
+          <div className="small fw-medium">{user?.name || 'User'}</div>
+          <div className="small text-muted">{user?.email || ''}</div>
         </div>
-        <span className="wa-avatar" title={user?.email}>
-          {getInitials(user?.email)}
+        <span className="wa-avatar" title={user?.name || user?.email}>
+          {getInitials(user?.name || user?.email)}
         </span>
       </div>
     </header>

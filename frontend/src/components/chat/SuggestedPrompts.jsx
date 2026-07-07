@@ -1,8 +1,9 @@
+import { FiArrowUpRight } from 'react-icons/fi';
 import { SUGGESTED_PROMPTS } from '../../utils/constants';
 
 export default function SuggestedPrompts({ onSelect }) {
   return (
-    <div className="d-flex flex-wrap gap-2 justify-content-center">
+    <div className="wa-prompt-grid">
       {SUGGESTED_PROMPTS.map((prompt) => (
         <button
           key={prompt}
@@ -10,7 +11,8 @@ export default function SuggestedPrompts({ onSelect }) {
           className="wa-prompt-chip"
           onClick={() => onSelect(prompt)}
         >
-          {prompt}
+          <FiArrowUpRight size={14} className="wa-prompt-chip-icon" />
+          <span>{prompt}</span>
         </button>
       ))}
     </div>

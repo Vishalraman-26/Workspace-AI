@@ -8,14 +8,23 @@ class CalendarSearch {
 
         let timeMax = null;
 
-        // Today
+        const startOfToday = () => {
+            const start = new Date();
+            start.setHours(0, 0, 0, 0);
+            return start;
+        };
+
+        const endOfToday = () => {
+            const end = new Date();
+            end.setHours(23, 59, 59, 999);
+            return end;
+        };
+
+        // Today (full day, including events that already started)
         if (options.today) {
 
-            const end = new Date();
-
-            end.setHours(23, 59, 59, 999);
-
-            timeMax = end.toISOString();
+            timeMin = startOfToday().toISOString();
+            timeMax = endOfToday().toISOString();
 
         }
 
@@ -38,12 +47,29 @@ class CalendarSearch {
 
         }
 
-        // This Week
+        // This Week (from start of today)
         else if (options.thisWeek) {
+
+            timeMin = startOfToday().toISOString();
 
             const end = new Date();
 
             end.setDate(end.getDate() + 7);
+            end.setHours(23, 59, 59, 999);
+
+            timeMax = end.toISOString();
+
+        }
+
+        // Upcoming range (e.g. next 30 days from start of today)
+        else if (options.rangeDays) {
+
+            timeMin = startOfToday().toISOString();
+
+            const end = new Date();
+
+            end.setDate(end.getDate() + options.rangeDays);
+            end.setHours(23, 59, 59, 999);
 
             timeMax = end.toISOString();
 

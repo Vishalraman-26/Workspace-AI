@@ -38,7 +38,7 @@ export default function TaskFormModal({ show, onHide, onSubmit, initialData, loa
   };
 
   return (
-    <Modal show={show} onHide={onHide} centered>
+    <Modal show={show} onHide={onHide} centered className="wa-modal-premium">
       <Form onSubmit={handleSubmit}>
         <Modal.Header closeButton>
           <Modal.Title>{initialData ? 'Edit Task' : 'Create Task'}</Modal.Title>

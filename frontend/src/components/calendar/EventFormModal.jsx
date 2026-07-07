@@ -59,7 +59,7 @@ export default function EventFormModal({ show, onHide, onSubmit, initialData, lo
   };
 
   return (
-    <Modal show={show} onHide={onHide} centered size="lg">
+    <Modal show={show} onHide={onHide} centered size="lg" className="wa-modal-premium">
       <Form onSubmit={handleSubmit}>
         <Modal.Header closeButton>
           <Modal.Title>{mode === 'edit' ? 'Update Meeting' : 'Create Meeting'}</Modal.Title>

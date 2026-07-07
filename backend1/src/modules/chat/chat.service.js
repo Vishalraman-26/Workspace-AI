@@ -7,6 +7,7 @@ import ToolMemoryService from "../toolMemory/toolMemory.service.js";
 import EntityResolver from "../entity/entityResolver.js";
 import ErrorHandler from "../../utils/errorHandler.js";
 import ResponseFormatter from "../../ai/responseFormatter.js";
+import ChatSessionService from "./chatSession.service.js";
 class ChatService {
 
     async chat(userId, sessionId, message) {
@@ -14,6 +15,35 @@ class ChatService {
             const history = await ConversationService.history(userId, sessionId);
             const conversationContext = ConversationService.buildContext(history);
             await ConversationService.save(userId, sessionId, "user", message);
+            const session =
+                await ChatSessionService.get(
+                    userId,
+                    sessionId
+                );
+
+            if (session.title === "New Chat") {
+
+                const title=message.trim().split(/\s+/).slice(0, 6).join(" ") + "...";
+
+                await ChatSessionService.rename(
+                    userId,
+                    sessionId,
+                    title
+                );
+
+            }
+            // Auto rename "New Chat" after the first message
+
+            if (history.length === 1) {
+                await ChatSessionService.rename(
+                    userId,
+                    sessionId,
+                    message.substring(0, 50)
+                );
+            }
+
+            // Update chat ordering
+            await ChatSessionService.touch(userId, sessionId);
             const memory =await ToolMemoryService.latest(userId,sessionId);
             const entity =EntityResolver.resolve(message,memory);
             console.log("========== ENTITY ==========");
@@ -49,7 +79,7 @@ class ChatService {
                 const reply = await generateText(message);
 
                 await ConversationService.save(userId,sessionId,"assistant",reply,planner.tool);
-
+                await ChatSessionService.touch(userId, sessionId);
                 return reply;
 
             }
@@ -145,7 +175,7 @@ class ChatService {
                         const reply = await generateText(finalPrompt);
 
                     await ConversationService.save(userId,sessionId,"assistant",reply,planner.tool);
-
+                    await ChatSessionService.touch(userId, sessionId);
                     return reply;
 
                     
@@ -207,7 +237,7 @@ class ChatService {
             const reply = await generateText(prompt);
 
             await ConversationService.save(userId,sessionId,"assistant",reply,planner.tool);
-
+            await ChatSessionService.touch(userId, sessionId);
             return reply;
 
             }
@@ -228,6 +258,7 @@ class ChatService {
                 const reply = await generateText(finalPrompt);
 
                 await ConversationService.save(userId,sessionId,"assistant",reply,planner.tool);
+                await ChatSessionService.touch(userId, sessionId);
                 await ConversationService.trim(userId,sessionId);
                 return reply;
 

@@ -4,8 +4,14 @@ import { Alert, Button, Form } from 'react-bootstrap';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
-function validateRegisterForm(email, password, confirmPassword) {
+function validateRegisterForm(name, email, password, confirmPassword) {
   const errors = {};
+
+  const trimmedName = name.trim();
+
+  if (!trimmedName) {
+    errors.name = 'Full name is required';
+  }
 
   if (!email.trim()) {
     errors.email = 'Email is required';
@@ -19,7 +25,9 @@ function validateRegisterForm(email, password, confirmPassword) {
     errors.password = 'Password must be at least 6 characters';
   }
 
-  if (password !== confirmPassword) {
+  if (!confirmPassword) {
+    errors.confirmPassword = 'Please confirm your password';
+  } else if (password !== confirmPassword) {
     errors.confirmPassword = 'Passwords do not match';
   }
 
@@ -29,6 +37,7 @@ function validateRegisterForm(email, password, confirmPassword) {
 export default function Register() {
   const { register, loading, isAuthenticated } = useAuth();
   const { showSuccess, showError } = useToast();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -41,12 +50,12 @@ export default function Register() {
 
   const handleRegister = async (event) => {
     event.preventDefault();
-    const errors = validateRegisterForm(email, password, confirmPassword);
+    const errors = validateRegisterForm(name, email, password, confirmPassword);
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
     try {
-      await register(email, password);
+      await register(name.trim(), email.trim(), password);
       setRegistered(true);
       showSuccess('Account created. You can now sign in.', 'Registration complete');
     } catch (err) {
@@ -71,6 +80,19 @@ export default function Register() {
 
         <Form onSubmit={handleRegister} noValidate>
           <Form.Group className="mb-3">
+            <Form.Label>Full Name</Form.Label>
+            <Form.Control
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              isInvalid={Boolean(fieldErrors.name)}
+              placeholder="Your full name"
+              autoComplete="name"
+            />
+            <Form.Control.Feedback type="invalid">{fieldErrors.name}</Form.Control.Feedback>
+          </Form.Group>
+
+          <Form.Group className="mb-3">
             <Form.Label>Email</Form.Label>
             <Form.Control
               type="email"
@@ -78,6 +100,7 @@ export default function Register() {
               onChange={(e) => setEmail(e.target.value)}
               isInvalid={Boolean(fieldErrors.email)}
               placeholder="you@company.com"
+              autoComplete="email"
             />
             <Form.Control.Feedback type="invalid">{fieldErrors.email}</Form.Control.Feedback>
           </Form.Group>
@@ -90,17 +113,20 @@ export default function Register() {
               onChange={(e) => setPassword(e.target.value)}
               isInvalid={Boolean(fieldErrors.password)}
               placeholder="At least 6 characters"
+              autoComplete="new-password"
             />
             <Form.Control.Feedback type="invalid">{fieldErrors.password}</Form.Control.Feedback>
           </Form.Group>
 
           <Form.Group className="mb-4">
-            <Form.Label>Confirm password</Form.Label>
+            <Form.Label>Confirm Password</Form.Label>
             <Form.Control
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               isInvalid={Boolean(fieldErrors.confirmPassword)}
+              placeholder="Re-enter your password"
+              autoComplete="new-password"
             />
             <Form.Control.Feedback type="invalid">{fieldErrors.confirmPassword}</Form.Control.Feedback>
           </Form.Group>

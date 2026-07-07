@@ -2,6 +2,7 @@ import { getErrorMessage } from './helpers';
 
 export const TOKEN_KEY = 'token';
 export const USER_KEY = 'user';
+export const SESSION_KEY = 'session';
 export const GOOGLE_CONNECTED_KEY = 'googleConnected';
 export const TOKEN_COOKIE_KEY = 'wa_token';
 
@@ -51,7 +52,10 @@ export function extractAuthPayload(responseData) {
   const root = responseData || {};
   const payload = root.data ?? root;
 
+  const session = payload.session || root.session || null;
+
   const token =
+    session?.access_token ||
     root.token ||
     root.access_token ||
     payload.token ||
@@ -60,12 +64,12 @@ export function extractAuthPayload(responseData) {
     root.session?.access_token;
 
   const user =
-    root.user ||
     payload.user ||
+    root.user ||
     payload.session?.user ||
     root.session?.user;
 
-  return { token, user };
+  return { token, user, session };
 }
 
 export function setTokenCookie(token) {
@@ -77,13 +81,16 @@ export function clearTokenCookie() {
   document.cookie = `${TOKEN_COOKIE_KEY}=; path=/; max-age=0; SameSite=Lax`;
 }
 
-export function persistAuthSession({ token, user }) {
+export function persistAuthSession({ token, user, session }) {
   if (token) {
     localStorage.setItem(TOKEN_KEY, token);
     setTokenCookie(token);
   }
   if (user) {
     localStorage.setItem(USER_KEY, JSON.stringify(user));
+  }
+  if (session) {
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
   }
 }
 
@@ -115,6 +122,7 @@ export function clearAuthCallbackParams() {
 export function clearAuthSession() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+  localStorage.removeItem(SESSION_KEY);
   localStorage.removeItem(GOOGLE_CONNECTED_KEY);
   localStorage.removeItem('accessToken');
   clearTokenCookie();
@@ -127,6 +135,15 @@ export function getStoredToken() {
 export function getStoredUser() {
   try {
     const raw = localStorage.getItem(USER_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function getStoredSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;

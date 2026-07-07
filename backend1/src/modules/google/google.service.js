@@ -1,8 +1,8 @@
+import { google } from "googleapis";
 import oauth2Client from "../../integrations/google/oauth.js";
 import env from "../../config/env.js";
-import supabase from "../../config/supabase.js";
 import GmailService from "./gmail.service.js";
-
+import supabase from "../../config/supabase.js";
 class GoogleService {
 
     async getAuthUrl(userId) {
@@ -45,6 +45,7 @@ class GoogleService {
                 token_type: tokens.token_type
             });
         console.log("SUPABASE ERROR:", error);
+
         if (error) {
             throw error;
         }

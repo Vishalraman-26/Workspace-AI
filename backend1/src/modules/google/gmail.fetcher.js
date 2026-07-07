@@ -28,7 +28,6 @@ class GmailFetcher {
             pageToken: searchOptions.pageToken
 
         });
-        console.log("GMAIL RAW RESPONSE:", data);
         return {
 
             messages: data.messages || [],

@@ -4,79 +4,245 @@ class VectorStore {
 
     async insert(document) {
 
-        const { data, error } = await supabase
-            .from("documents")
-            .insert(document)
-            .select();
+        try {
 
-        if (error) throw error;
+            const { data, error } =
+                await supabase
 
-        return data;
+                    .from("documents")
+
+                    .insert(document)
+
+                    .select();
+
+            if (error) throw error;
+
+            return data;
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Vector Insert Error:",
+                error
+            );
+
+            throw new Error(
+                "Failed to insert document."
+            );
+
+        }
 
     }
 
     async insertMany(documents) {
 
-        const { data, error } = await supabase
-            .from("documents")
-            .insert(documents)
-            .select();
+        try {
 
-        if (error) throw error;
+            if (!documents.length) {
 
-        return data;
+                throw new Error(
+                    "No documents to insert."
+                );
+
+            }
+
+            const { data, error } =
+                await supabase
+
+                    .from("documents")
+
+                    .insert(documents)
+
+                    .select();
+
+            if (error) throw error;
+
+            return data;
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Bulk Insert Error:",
+                error
+            );
+
+            throw new Error(
+                "Failed to save document vectors."
+            );
+
+        }
 
     }
 
     async search(userId, queryEmbedding, matchCount = 5) {
 
-        const { data, error } = await supabase.rpc(
-    
-            "match_documents",
-    
-            {
-    
-                query_user_id: userId,
-    
-                query_embedding: queryEmbedding,
-    
-                match_count: matchCount,
-    
-                match_threshold: 0.00
-    
-            }
-    
-        );
-    
-        if (error) throw error;
-    
-        return data;
-    
+        try {
+
+            const { data, error } =
+                await supabase.rpc(
+
+                    "match_documents",
+
+                    {
+
+                        query_user_id: userId,
+
+                        query_embedding: queryEmbedding,
+
+                        match_count: matchCount,
+
+                        match_threshold: 0.00
+
+                    }
+
+                );
+
+            if (error) throw error;
+
+            return data ?? [];
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Vector Search Error:",
+                error
+            );
+
+            throw new Error(
+                "Knowledge search failed."
+            );
+
+        }
+
     }
 
     async clear(userId) {
 
-        const { error } = await supabase
-            .from("documents")
-            .delete()
-            .eq("user_id", userId);
-    
-        if (error) throw error;
-    
+        try {
+
+            const { error } =
+                await supabase
+
+                    .from("documents")
+
+                    .delete()
+
+                    .eq("user_id", userId);
+
+            if (error) throw error;
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Clear Documents Error:",
+                error
+            );
+
+            throw new Error(
+                "Failed to delete documents."
+            );
+
+        }
+
     }
+
     async documentExists(userId, filename) {
 
-        const { data, error } = await supabase
-            .from("documents")
-            .select("id")
-            .eq("user_id", userId)
-            .eq("title", filename)
-            .limit(1);
-    
-        if (error) throw error;
-    
-        return data.length > 0;
+        try {
+
+            const { data, error } =
+                await supabase
+
+                    .from("documents")
+
+                    .select("id")
+
+                    .eq("user_id", userId)
+
+                    .eq("title", filename)
+
+                    .limit(1);
+
+            if (error) throw error;
+
+            return (data?.length ?? 0) > 0;
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Document Exists Error:",
+                error
+            );
+
+            throw new Error(
+                "Failed to verify existing document."
+            );
+
+        }
+
     }
+    async listDocuments(userId){
+
+    const { data, error } = await supabase
+
+        .from("documents")
+
+        .select("title,metadata")
+
+        .eq("user_id", userId);
+
+    if(error) throw error;
+
+    const unique = [];
+
+    const seen = new Set();
+
+    for(const doc of data){
+
+        if(!seen.has(doc.title)){
+
+            seen.add(doc.title);
+
+            unique.push({
+
+                id: doc.title,
+
+                name: doc.title,
+
+                uploadedAt: doc.metadata?.uploadedAt
+
+            });
+
+        }
+
+    }
+
+    return unique;
+
+}
+async deleteDocument(title) {
+
+    const { error } = await supabase
+
+        .from("documents")
+
+        .delete()
+
+        .eq("title", title);
+
+    if (error) throw error;
+
+}
 
 }
 

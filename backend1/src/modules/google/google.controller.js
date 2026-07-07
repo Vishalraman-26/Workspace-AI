@@ -1,5 +1,6 @@
 import GoogleService from "./google.service.js";
 import GmailService from "./gmail.service.js";
+
 class GoogleController {
     async connect(req, res) {
         const url = await GoogleService.getAuthUrl(req.user.id);
@@ -33,7 +34,6 @@ class GoogleController {
         try {
             const emails = await GmailService.fetchInbox(req.user.id);
             res.json(emails);
-            console.log("Fetched emails:", emails);
         } catch (err) {
             res.status(500).json({
                 success: false,

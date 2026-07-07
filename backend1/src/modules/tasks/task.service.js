@@ -4,7 +4,7 @@ import BaseService from "../../shared/base.service.js";
 class TaskService extends BaseService {
 
     async getTasks(userId) {
-
+        console.log("Current User:", userId);
         const { data, error } = await supabase
             .from("tasks")
             .select("*")

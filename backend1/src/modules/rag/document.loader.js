@@ -2,28 +2,43 @@ import fs from "fs/promises";
 import path from "path";
 import pdf from "pdf-parse-new";
 import mammoth from "mammoth";
-
+import pptx2json from "pptx2json";
 class DocumentLoader {
 
     async load(filePath) {
 
-        const extension =path.extname(filePath).toLowerCase();
+        try {
 
-        switch (extension) {
+            await fs.access(filePath);
 
-            case ".pdf":
-                return this.loadPDF(filePath);
+            const extension = path.extname(filePath).toLowerCase();
 
-            case ".txt":
-                return this.loadTXT(filePath);
+            switch (extension) {
 
-            case ".docx":
-                return this.loadDOCX(filePath);
+                case ".pdf":
+                    return await this.loadPDF(filePath);
 
-            default:
-                throw new Error(
-                    "Unsupported document format."
-                );
+                case ".txt":
+                    return await this.loadTXT(filePath);
+
+                case ".docx":
+                    return await this.loadDOCX(filePath);
+                case ".pptx":
+                    return await this.loadPPTX(filePath);
+                default:
+                    throw new Error(
+                        `Unsupported document format: ${extension}`
+                    );
+
+            }
+
+        }
+
+        catch (error) {
+
+            console.error("Document Loader Error:", error);
+
+            throw error;
 
         }
 
@@ -31,57 +46,175 @@ class DocumentLoader {
 
     async loadPDF(filePath) {
 
-        const buffer =
-            await fs.readFile(filePath);
+        try {
 
-        const data =
-            await pdf(buffer);
+            const buffer = await fs.readFile(filePath);
 
-        return {
+            const data = await pdf(buffer);
+            console.log("Pages:", data.numpages);
 
-            title: path.basename(filePath),
 
-            text: data.text
+            if (!data.text?.trim()) {
 
-        };
+                throw new Error(
+                    "PDF contains no readable text. It may be scanned or corrupted."
+                );
+
+            }
+
+            return {
+
+                title: path.basename(filePath),
+
+                text: data.text.trim()
+
+            };
+
+        }
+
+        catch (error) {
+
+            console.error("PDF Parsing Error:", error);
+
+            throw new Error(
+                `Unable to read PDF "${path.basename(filePath)}".`
+            );
+
+        }
 
     }
 
     async loadTXT(filePath) {
 
-        const text =
-            await fs.readFile(
+        try {
+
+            const text = await fs.readFile(
                 filePath,
                 "utf8"
             );
 
-        return {
+            if (!text.trim()) {
 
-            title: path.basename(filePath),
+                throw new Error(
+                    "Text file is empty."
+                );
 
-            text
+            }
 
-        };
+            return {
+
+                title: path.basename(filePath),
+
+                text: text.trim()
+
+            };
+
+        }
+
+        catch (error) {
+
+            console.error("TXT Loading Error:", error);
+
+            throw new Error(
+                `Unable to read TXT "${path.basename(filePath)}".`
+            );
+
+        }
 
     }
 
     async loadDOCX(filePath) {
 
-        const result =
-            await mammoth.extractRawText({
+        try {
 
-                path: filePath
+            const result =
+                await mammoth.extractRawText({
 
-            });
+                    path: filePath
 
-        return {
+                });
 
-            title: path.basename(filePath),
+            if (!result.value?.trim()) {
 
-            text: result.value
+                throw new Error(
+                    "DOCX contains no readable text."
+                );
 
-        };
+            }
 
+            return {
+
+                title: path.basename(filePath),
+
+                text: result.value.trim()
+
+            };
+
+        }
+
+        catch (error) {
+
+            console.error("DOCX Loading Error:", error);
+
+            throw new Error(
+                `Unable to read DOCX "${path.basename(filePath)}".`
+            );
+
+        }
+
+    }
+    async loadPPTX(filePath) {
+
+        try {
+    
+            const presentation = await pptx2json(filePath);
+    
+            let text = "";
+    
+            for (const slide of presentation.slides || []) {
+    
+                for (const shape of slide.shapes || []) {
+    
+                    if (shape.text) {
+    
+                        text += shape.text + "\n";
+    
+                    }
+    
+                }
+    
+                text += "\n";
+    
+            }
+    
+            if (!text.trim()) {
+    
+                throw new Error(
+                    "PPTX contains no readable text."
+                );
+    
+            }
+    
+            return {
+    
+                title: path.basename(filePath),
+    
+                text: text.trim()
+    
+            };
+    
+        }
+    
+        catch (error) {
+    
+            console.error("PPTX Loading Error:", error);
+    
+            throw new Error(
+                `Unable to read PPTX "${path.basename(filePath)}".`
+            );
+    
+        }
+    
     }
 
 }

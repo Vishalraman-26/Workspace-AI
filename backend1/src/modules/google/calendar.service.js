@@ -7,7 +7,8 @@ class CalendarService {
     async test(userId) {
 
         return await this.retrieveCalendar(userId, {
-            maxResults: 10
+            rangeDays: 30,
+            maxResults: 100
         });
 
     }

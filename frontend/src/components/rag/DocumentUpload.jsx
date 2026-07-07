@@ -61,18 +61,26 @@ export function DocumentList({ documents, onDelete }) {
     <div className="d-flex flex-column gap-2">
       {documents.map((doc) => (
         <div key={doc.id} className="wa-card p-3 d-flex align-items-center justify-content-between gap-3">
-          <div className="d-flex align-items-center gap-3">
-            <div className="wa-stat-icon bg-primary bg-opacity-10 text-primary">
-              <FiFileText />
+          <div className="d-flex align-items-center gap-3 flex-grow-1" style={{ minWidth: 0 }}>
+          <div className="wa-stat-icon bg-primary bg-opacity-10 text-primary">
+            <FiFileText />
+          </div>
+
+          <div className="flex-grow-1" style={{ minWidth: 0 }}>
+            <div className="fw-medium text-truncate" title={doc.name}>
+              {doc.name}
             </div>
-            <div>
-              <div className="fw-medium">{doc.name}</div>
-              <div className="small text-muted">
-                {doc.chunks ? `${doc.chunks} chunks` : 'Indexed'} · {formatRelative(doc.uploadedAt)}
-              </div>
+
+            <div className="small text-muted">
+              {doc.chunks ? `${doc.chunks} chunks` : "Indexed"} · {formatRelative(doc.uploadedAt)}
             </div>
           </div>
-          <Button variant="outline-danger" size="sm" onClick={() => onDelete(doc.id)}>
+        </div>
+          <Button
+            variant="outline-danger"
+            size="sm"
+            onClick={() => onDelete(doc.name)}
+          >
             <FiTrash2 size={14} />
           </Button>
         </div>
