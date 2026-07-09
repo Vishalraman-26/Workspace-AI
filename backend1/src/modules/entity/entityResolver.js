@@ -53,9 +53,9 @@ class EntityResolver {
         }
 
         // Calendar
-        if (memory.tool === "retrieveCalendar") {
+        if (memory.tool === "retrieveCalendar"  || memory.tool === "scheduleMeeting" ||  memory.tool === "updateMeeting") {
 
-            const events = data.events || [];
+            const events = Array.isArray(data.events) ? data.events    : [data];
 
             if (text.includes("first"))
                 return {
@@ -89,7 +89,14 @@ class EntityResolver {
                     entity: events[events.length - 1]
                 };
 
-            if (text.includes("it") || text.includes("meeting"))
+            if (
+                text.includes("it") ||
+                text.includes("meeting") ||
+                text.includes("time") ||
+                text.includes("timing") ||
+                text.includes("reschedule") ||
+                text.includes("move")
+            )
                 return {
                     tool: memory.tool,
                     type: "meeting",

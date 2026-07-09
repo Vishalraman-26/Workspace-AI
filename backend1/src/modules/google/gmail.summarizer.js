@@ -50,13 +50,7 @@ Instructions:
 9. Keep the answer under 200 words.
 10. Return natural English only.
 `;
-        console.log("========== SUMMARY INPUT ==========");
-        console.log({
-            total: stats.total,
-            unread: stats.unread,
-            important: stats.important,
-            actionRequired: stats.actionRequired
-        });
+
         return await generateText(prompt);
 
     }

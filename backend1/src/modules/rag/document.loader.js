@@ -51,7 +51,6 @@ class DocumentLoader {
             const buffer = await fs.readFile(filePath);
 
             const data = await pdf(buffer);
-            console.log("Pages:", data.numpages);
 
 
             if (!data.text?.trim()) {

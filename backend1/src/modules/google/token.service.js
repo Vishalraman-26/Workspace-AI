@@ -9,13 +9,7 @@ class TokenService {
             .select("*")
             .eq("user_id", userId)
             .maybeSingle();
-        if (data) {
-            console.log("Google Tokens:", data);
-        }
-        if (error) {
-            console.log("Error:", error);
-            throw error;
-        }
+
         
         return data;
     }

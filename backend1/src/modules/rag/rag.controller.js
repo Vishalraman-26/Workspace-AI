@@ -3,7 +3,6 @@ import RAGService from "./rag.service.js";
 
 export async function upload(req, res) {
     
-    console.log("UPLOAD REQUEST RECEIVED");
     let uploadedFile = null;
 
     try {
@@ -33,7 +32,6 @@ export async function upload(req, res) {
         }
 
         uploadedFile = req.file.path;
-        console.log("INDEX DOCUMENT START");
         const result = await RAGService.indexDocument(
 
             req.user.id,

@@ -116,7 +116,7 @@ export default function Dashboard() {
         todayMeetings = getTodayEvents(events).length;
         meetingActivity = events.slice(0, 3).map((event) => ({
           id: event.id,
-          type: 'meeting',
+          type: 'Calendar Event',
           title: event.title,
           subtitle: 'Calendar event',
           time: event.start,
@@ -215,7 +215,11 @@ export default function Dashboard() {
                 {activity.map((item) => (
                   <div key={`${item.type}-${item.id}`} className="d-flex justify-content-between align-items-start gap-3 pb-3 border-bottom">
                     <div>
-                      <div className="fw-medium">{item.title}</div>
+                      <div className="fw-medium">{item.title}{" "}
+                        <span className="text-muted small">
+                          ({item.type})
+                        </span>
+                      </div>
                       <div className="small text-muted">{item.subtitle}</div>
                     </div>
                     <small className="text-muted flex-shrink-0">{formatRelative(item.time)}</small>

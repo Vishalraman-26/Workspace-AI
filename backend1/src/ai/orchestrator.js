@@ -4,32 +4,33 @@ import TaskService from "../modules/tasks/task.service.js";
 import { generateText } from "./gemini.js";
 import WorkspacePrompt from "./workspacePrompt.js";
 import ContextBuilder from "./contextBuilder.js";
+import ConversationService from "../modules/conversation/conversation.service.js";
 class Orchestrator {
 
-    async execute(userId, intent) {
+    async execute(userId, sessionId, intent) {
 
         switch(intent){
 
             case "daily_summary":
-                return this.dailySummary(userId);
+                return this.dailySummary(userId, sessionId);
 
             case "prepare_tomorrow":
-                return this.prepareTomorrow(userId);
+                return this.prepareTomorrow(userId, sessionId);
 
             case "urgent_today":
-                return this.urgentToday(userId);
+                return this.urgentToday(userId, sessionId);
 
             case "daily_briefing":
-                return this.dailyBriefing(userId);
+                return this.dailyBriefing(userId, sessionId);
 
             case "prepare_interview":
-                return this.prepareInterview(userId);
+                return this.prepareInterview(userId, sessionId);
 
             case "meeting_tasks":
-                return this.meetingTasks(userId);
+                return this.meetingTasks(userId, sessionId);
 
             case "related_emails":
-                return this.relatedEmails(userId);
+                return this.relatedEmails(userId, sessionId);
 
             default:
                 throw new Error("Unknown orchestrator intent.");
@@ -38,7 +39,7 @@ class Orchestrator {
         
 
     }
-    async dailySummary(userId){
+    async dailySummary(userId, sessionId){
 
         const context =
             await ContextBuilder.build(
@@ -62,13 +63,13 @@ class Orchestrator {
 
         const reply = await generateText(prompt);
 
-        await ConversationService.save(userId,sessionId,"assistant",reply,planner.tool);
+        await ConversationService.save(userId,sessionId,"assistant",reply,"daily_summary");
 
         return reply;
 
     }
 
-    async prepareTomorrow(userId){
+    async prepareTomorrow(userId, sessionId){
 
         const context =
             await ContextBuilder.build(
@@ -92,12 +93,12 @@ class Orchestrator {
 
         const reply = await generateText(prompt);
 
-        await ConversationService.save(userId,sessionId,"assistant",reply,planner.tool);
+        await ConversationService.save(userId,sessionId,"assistant",reply,"prepare_tomorrow");
 
         return reply;
 
     }
-    async urgentToday(userId){
+    async urgentToday(userId, sessionId){
 
         const context =
             await ContextBuilder.build(
@@ -119,16 +120,16 @@ class Orchestrator {
         const prompt =
             WorkspacePrompt.urgentToday(context)
 
-        const reply = await generateText(Prompt);
+        const reply = await generateText(prompt);
 
-        await ConversationService.save(userId,sessionId,"assistant",reply,planner.tool);
+        await ConversationService.save(userId,sessionId,"assistant",reply,"urgentToday");
 
         return reply;
 
         
 
     }
-    async prepareInterview(userId) {
+    async prepareInterview(userId, sessionId) {
 
         const context = await ContextBuilder.build(userId, {
 
@@ -148,14 +149,14 @@ class Orchestrator {
 
         const prompt = WorkspacePrompt.prepareInterview(context);
 
-        const reply = await generateText(Prompt);
+        const reply = await generateText(prompt);
 
-        await ConversationService.save(userId,sessionId,"assistant",reply,planner.tool);
+        await ConversationService.save(userId,sessionId,"assistant",reply,"prepare_interview");
 
         return reply;
 
     }
-    async meetingTasks(userId) {
+    async meetingTasks(userId, sessionId) {
 
         const context = await ContextBuilder.build(userId, {
 
@@ -166,16 +167,16 @@ class Orchestrator {
         });
 
         const prompt = WorkspacePrompt.meetingTasks(context);
-        const reply = await generateText(Prompt);
+        const reply = await generateText(prompt);
 
-        await ConversationService.save(userId,sessionId,"assistant",reply,planner.tool);
+        await ConversationService.save(userId,sessionId,"assistant",reply,"meeting_tasks");
 
         return reply;
 
         
 
     }
-    async relatedEmails(userId){
+    async relatedEmails(userId, sessionId){
 
         const context = await ContextBuilder.build(userId,{
 
@@ -192,14 +193,14 @@ class Orchestrator {
 
         const prompt = WorkspacePrompt.relatedEmails(context);
 
-        const reply = await generateText(Prompt);
+        const reply = await generateText(prompt);
 
-        await ConversationService.save(userId,sessionId,"assistant",reply,planner.tool);
+        await ConversationService.save(userId,sessionId,"assistant",reply,"related_emails");
 
         return reply;
 
     }
-    async dailyBriefing(userId){
+    async dailyBriefing(userId, sessionId){
 
         const context = await ContextBuilder.build(userId,{
 
@@ -218,9 +219,9 @@ class Orchestrator {
 
         const prompt = WorkspacePrompt.dailyBriefing(context);
 
-        const reply = await generateText(Prompt);
+        const reply = await generateText(prompt);
 
-        await ConversationService.save(userId,sessionId,"assistant",reply,planner.tool);
+        await ConversationService.save(userId,sessionId,"assistant",reply,"daily_briefing");
 
         return reply;
 

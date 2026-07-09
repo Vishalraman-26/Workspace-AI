@@ -73,7 +73,6 @@ class GmailFetcher {
                 b.priority - a.priority ||
                 new Date(b.date) - new Date(a.date)
         );
-        console.log("GMAIL EMAILS:", emails);
         return emails;
     }
 

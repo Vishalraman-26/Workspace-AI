@@ -72,10 +72,20 @@ export default function Assistant() {
             await loadMessages(sessionId);
             await reloadSessions();
         } catch (err) {
-            setError(
-                getErrorMessage(err, "Failed to send message.")
+            const errorMessage = getErrorMessage(
+                err,
+                "Sorry, I'm unable to respond right now. Please try again."
             );
-        } finally {
+
+            setError(errorMessage);
+
+            addMessage(sessionId, {
+                id: `error-${Date.now()}`,
+                role: "assistant",
+                content: "⚠️ Sorry, I'm unable to respond right now. Please try again in a few moments.",
+                timestamp: new Date().toISOString(),
+            });
+        }finally {
             setSending(false);
         }
     };

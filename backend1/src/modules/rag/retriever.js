@@ -55,8 +55,6 @@ class Retriever {
 
             if (process.env.NODE_ENV === "development") {
 
-                console.log("========== RAG RESULTS ==========");
-
                 console.table(
 
                     results.map(result => ({

@@ -4,7 +4,6 @@ import BaseService from "../../shared/base.service.js";
 class TaskService extends BaseService {
 
     async getTasks(userId) {
-        console.log("Current User:", userId);
         const { data, error } = await supabase
             .from("tasks")
             .select("*")
@@ -65,42 +64,123 @@ class TaskService extends BaseService {
         return data;
     }
 
-    async updateTask(userId, taskId, updates) {
+async updateTask(userId, args) {
 
-        updates.updated_at = new Date().toISOString();
+    let task;
+    if (args.status) {
+        const status = args.status.toLowerCase();
+        if (status === "completed" || status === "complete" || status === "done") {
+            args.completed = true;
+        }
+        if (status === "pending" || status === "incomplete") {
+            args.completed = false;
+        }
+        delete args.status;
+    }
+
+    if (args.id) {
+
+        task = await this.getTaskById(userId, args.id);
+
+    } else if (args.title) {
 
         const { data, error } = await supabase
             .from("tasks")
-            .update(updates)
-            .eq("id", taskId)
+            .select("*")
             .eq("user_id", userId)
-            .select()
+            .ilike("title", args.title)
+            .limit(1)
             .single();
 
-        if (error) {
-            this.handleError(error);
+        if (error || !data) {
+            throw new Error(`Task "${args.title}" not found.`);
         }
 
-        return data;
+        task = data;
+
+    } else {
+
+        throw new Error("Task identifier is required.");
+
     }
 
-    async deleteTask(userId, taskId) {
+    const updates = {
 
-        const { error } = await supabase
-            .from("tasks")
-            .delete()
-            .eq("id", taskId)
-            .eq("user_id", userId);
+        ...(args.newTitle && { title: args.newTitle }),
+        ...(args.description && { description: args.description }),
+        ...(args.priority && { priority: args.priority }),
+        ...(typeof args.completed === "boolean" && {
+            completed: args.completed
+        }),
+        ...(args.due_date && { due_date: args.due_date }),
 
-        if (error) {
-            this.handleError(error);
+        updated_at: new Date().toISOString()
+
+    };
+
+    const { data, error } = await supabase
+        .from("tasks")
+        .update(updates)
+        .eq("id", task.id)
+        .eq("user_id", userId)
+        .select()
+        .single();
+
+    if (error) this.handleError(error);
+
+    return data;
+}
+    async deleteTask(userId, taskRef) {
+
+    let taskId = taskRef;
+
+    // If AI passes an object instead of UUID
+    if (typeof taskRef === "object") {
+
+        if (taskRef.id) {
+
+            taskId = taskRef.id;
+
+        } else if (taskRef.title) {
+
+            const { data, error } = await supabase
+                .from("tasks")
+                .select("id")
+                .eq("user_id", userId)
+                .ilike("title", taskRef.title)
+                .limit(1)
+                .single();
+
+            if (error || !data) {
+                throw new Error(`Task "${taskRef.title}" not found.`);
+            }
+
+            taskId = data.id;
+
+        } else {
+
+            throw new Error("Task identifier is missing.");
+
         }
 
-        return {
-            success: true,
-            message: "Task deleted successfully."
-        };
     }
+
+    const { error } = await supabase
+        .from("tasks")
+        .delete()
+        .eq("id", taskId)
+        .eq("user_id", userId);
+
+    if (error) {
+        this.handleError(error);
+    }
+
+    return {
+        success: true,
+        message: "Task deleted successfully."
+    };
+
+}
 
 }
 

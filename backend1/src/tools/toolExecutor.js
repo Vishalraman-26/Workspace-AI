@@ -21,9 +21,6 @@ export async function executeTool(plan,userId){
         if(tool.schema){
             tool.schema.parse(plan.args);
         }
-        console.log("Selected Tool:", tool);
-        console.log("Service Name:", tool.service);
-        console.log("Available Services:", Object.keys(services));
         const service = services[tool.service];
         if (!service) {
             throw new Error(`Unknown service: ${tool.service}`);

@@ -2,7 +2,6 @@ import { chatService } from "../services/planner.service.js";
 
 export async function planner(req, res) {
 
-    console.log("Controller Started");
 
     try {
 
@@ -10,7 +9,6 @@ export async function planner(req, res) {
 
         const response = await chatService(message);
 
-        console.log("Response =", response);
 
         return res.json(response);
 

@@ -19,7 +19,7 @@ export const CreateTaskSchema = z.object({
 export const UpdateTaskSchema = z.object({
 
     title: z.string().optional(),
-
+    newTitle: z.string().optional(),
     description: z.string().optional(),
 
     priority: z.enum([

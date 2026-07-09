@@ -21,15 +21,13 @@ class GoogleService {
             ],
             state
         });
-        console.log("Generated Google Auth URL:", url);
         return url;
     }
 
     async handleCallback(code, state) {
 
         const { tokens } = await oauth2Client.getToken(code);
-        console.log("TOKENS:");
-        console.log(tokens);
+
         const userId = Buffer
             .from(state, "base64")
             .toString();

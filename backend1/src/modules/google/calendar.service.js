@@ -91,9 +91,16 @@ class CalendarService {
 
                 location: args.location ?? event.location,
 
-                start: args.start ?? event.start,
+                start:
+                    args.start ??
+                    event.start?.dateTime ??
+                    event.start?.date,
 
-                end: args.end ?? event.end
+                end:
+                    args.end ??
+                    event.end?.dateTime ??
+                    event.end?.date
+
 
             }
 

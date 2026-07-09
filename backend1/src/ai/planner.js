@@ -228,20 +228,65 @@ Return
 }
 
 ------------------------
-Schedule a meeting tomorrow.
+User:
+Schedule a meeting tomorrow called Planning.
 
 Return
 
 {
-"action":"tool",
-"tool":"scheduleMeeting",
-"args":{
-"title":"Meeting",
-"start":"2026-07-01T14:00:00+05:30",
-"end":"2026-07-01T15:00:00+05:30"
+  "action":"tool",
+  "tool":"scheduleMeeting",
+  "args":{
+    "title":"Planning",
+    "start":"2026-07-08T09:00:00+05:30",
+    "end":"2026-07-08T10:00:00+05:30"
+  }
 }
-}s
 
+User:
+Create a meeting on 4th July called Project Review.
+
+Return
+
+{
+  "action":"tool",
+  "tool":"scheduleMeeting",
+  "args":{
+    "title":"Project Review",
+    "start":"2026-07-04T09:00:00+05:30",
+    "end":"2026-07-04T10:00:00+05:30"
+  }
+}
+
+User:
+Create a meeting on 4th July at 2 PM called Client Call.
+
+Return
+
+{
+  "action":"tool",
+  "tool":"scheduleMeeting",
+  "args":{
+    "title":"Client Call",
+    "start":"2026-07-04T14:00:00+05:30",
+    "end":"2026-07-04T15:00:00+05:30"
+  }
+}
+
+User:
+Create a meeting today called Standup.
+
+Return
+
+{
+  "action":"tool",
+  "tool":"scheduleMeeting",
+  "args":{
+    "title":"Standup",
+    "start":"2026-07-07T09:00:00+05:30",
+    "end":"2026-07-07T10:00:00+05:30"
+  }
+}
 ------------------------
 
 User:
@@ -563,6 +608,20 @@ Delete the second meeting.
   }
 }
 
+Calendar Rules
+
+1. Always return complete ISO-8601 start and end datetime values.
+
+2. If the user provides only a date, use:
+   Start: 09:00
+   End:   10:00
+
+3. If the user provides both date and time, preserve the requested time and set the end time to one hour later unless specified otherwise.
+
+4. Never return only "tomorrow", "today", or "4th July". Convert them into ISO datetime strings.
+
+5. Use timezone Asia/Kolkata (+05:30).
+
 
 Rules
 
@@ -587,9 +646,7 @@ export default async function plan(message){
 
     ${message}
     `;
-      console.log("----------Calling Gemini---------...");
     const reply = await generateText(prompt);
-console.log("----------Gemini Response---------...");
     try {
         return JSON.parse(reply);
     }

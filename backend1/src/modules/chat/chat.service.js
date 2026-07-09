@@ -46,8 +46,7 @@ class ChatService {
             await ChatSessionService.touch(userId, sessionId);
             const memory =await ToolMemoryService.latest(userId,sessionId);
             const entity =EntityResolver.resolve(message,memory);
-            console.log("========== ENTITY ==========");
-            console.log(entity);
+
             const planner = await plan(
                 `Previous Conversation:
                 ${conversationContext}
@@ -86,6 +85,7 @@ class ChatService {
             if (planner.action === "orchestrate") {
                 return await Orchestrator.execute(
                     userId,
+                    sessionId,
                     planner.intent
                 );
             }
@@ -98,6 +98,148 @@ class ChatService {
 
             );
             await ToolMemoryService.save(userId,sessionId,planner.tool,toolResult);
+            
+            // ==============================
+            // Calendar CRUD (No Gemini)
+            // ==============================
+
+            if (planner.tool === "scheduleMeeting") {
+
+                const start = new Date(toolResult.start.dateTime);
+                const end = new Date(toolResult.end.dateTime);
+
+                const reply =
+            `✅ Meeting "${toolResult.summary}" has been scheduled successfully.
+
+            📅 ${start.toLocaleDateString("en-IN", {
+                day: "numeric",
+                month: "long",
+                year: "numeric"
+            })}
+
+            🕒 ${start.toLocaleTimeString("en-IN", {
+                hour: "numeric",
+                minute: "2-digit"
+            })} - ${end.toLocaleTimeString("en-IN", {
+                hour: "numeric",
+                minute: "2-digit"
+            })}`;
+
+                await ConversationService.save(
+                    userId,
+                    sessionId,
+                    "assistant",
+                    reply,
+                    planner.tool
+                );
+
+                return reply;
+            }
+
+            if (planner.tool === "updateMeeting") {
+
+                const start = new Date(toolResult.start.dateTime);
+                const end = new Date(toolResult.end.dateTime);
+
+                const reply =
+            `✅ Meeting "${toolResult.summary}" has been updated successfully.
+
+            📅 ${start.toLocaleDateString("en-IN", {
+                day: "numeric",
+                month: "long",
+                year: "numeric"
+            })}
+
+            🕒 ${start.toLocaleTimeString("en-IN", {
+                hour: "numeric",
+                minute: "2-digit"
+            })} - ${end.toLocaleTimeString("en-IN", {
+                hour: "numeric",
+                minute: "2-digit"
+            })}`;
+
+                await ConversationService.save(
+                    userId,
+                    sessionId,
+                    "assistant",
+                    reply,
+                    planner.tool
+                );
+
+                return reply;
+            }
+
+            if (planner.tool === "deleteMeeting") {
+
+                const reply = "✅ Meeting deleted successfully.";
+
+                await ConversationService.save(
+                    userId,
+                    sessionId,
+                    "assistant",
+                    reply,
+                    planner.tool
+                );
+
+                return reply;
+            }
+
+            // ==============================
+            // Task CRUD (No Gemini)
+            // ==============================
+
+            if (planner.tool === "createTask") {
+
+                const reply =
+            `✅ Task "${toolResult.title}" has been created successfully.
+
+            ${toolResult.priority ? `🔥 Priority: ${toolResult.priority}\n` : ""}${toolResult.due_date ? `📅 Due: ${new Date(toolResult.due_date).toLocaleDateString("en-IN")}` : ""}`;
+
+                await ConversationService.save(
+                    userId,
+                    sessionId,
+                    "assistant",
+                    reply,
+                    planner.tool
+                );
+
+                return reply;
+            }
+
+            if (planner.tool === "updateTask") {
+
+                const reply =
+            `✅ Task "${toolResult.title}" has been updated successfully.
+
+            ${toolResult.priority ? `🔥 Priority: ${toolResult.priority}\n` : ""}${toolResult.status ? `📌 Status: ${toolResult.status}\n` : ""}${toolResult.due_date ? `📅 Due: ${new Date(toolResult.due_date).toLocaleDateString("en-IN")}` : ""}`;
+
+                await ConversationService.save(
+                    userId,
+                    sessionId,
+                    "assistant",
+                    reply,
+                    planner.tool
+                );
+
+                return reply;
+            }
+
+            if (planner.tool === "deleteTask") {
+
+                const reply = `✅ Task deleted successfully.`;
+
+                await ConversationService.save(
+                    userId,
+                    sessionId,
+                    "assistant",
+                    reply,
+                    planner.tool
+                );
+
+                return reply;
+            }
+
+
 
             if (planner.tool === "searchEmails") {
 
@@ -177,8 +319,6 @@ class ChatService {
                     await ConversationService.save(userId,sessionId,"assistant",reply,planner.tool);
                     await ChatSessionService.touch(userId, sessionId);
                     return reply;
-
-                    
 
             }
             if (planner.tool === "retrieveCalendar") {
@@ -266,11 +406,24 @@ class ChatService {
         
         }
         catch(error){
+
             console.error(error);
 
-            throw new Error(
-                ErrorHandler.format(error)
-            );
+            const errorMessage = ErrorHandler.format(error);
+
+            try {
+
+                await ConversationService.save(
+                    userId,
+                    sessionId,
+                    "assistant",
+                    `⚠️ ${errorMessage}`
+                );
+
+            } catch {}
+
+            throw new Error(errorMessage);
+
         }
 
     }

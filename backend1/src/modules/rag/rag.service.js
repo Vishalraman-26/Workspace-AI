@@ -30,8 +30,6 @@ class RAGService {
 
             const document =
                 await DocumentLoader.load(filePath);
-                console.log("DOCUMENT LOADED");
-                console.log("Text Length:", document.text.length);
             if (!document.text?.trim()) {
 
                 throw new Error(
@@ -41,8 +39,7 @@ class RAGService {
             }
 
             const  chunks = (await Chunker.chunk(document.text)).filter(chunk => chunk.text?.trim());
-            console.log("Chunks:", chunks.length);
-            console.log("Chunks:", chunks);
+
             if (!chunks.length) {
 
                 throw new Error(
@@ -110,7 +107,6 @@ class RAGService {
             }
 
             try {
-                console.log("Vectors to insert:", vectors.length);
                 await VectorStore.insertMany(vectors);
 
             }
